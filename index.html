@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIDITA Fleet — Lease, Rent or Buy</title>
+<meta name="description" content="Browse SIDITA Halal Rentals' full fleet and request a lease, rental, or purchase — transparent, interest-free terms.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#ffffff; --bg-soft:#f6f8f9; --ink:#0b1a1a; --ink-soft:#2f4040;
+    --green:#1a7a5a; --green-dark:#0e5f45; --gold:#d4a14b; --gold-light:#f3e3c4;
+    --border:rgba(0,0,0,0.08); --shadow:0 12px 30px rgba(0,0,0,0.05); --radius:24px;
+  }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+  }
+  h1,h2,h3,h4{ font-family:'Syne','Inter',sans-serif; font-weight:600; letter-spacing:-0.02em; line-height:1.15; }
+  a{ text-decoration:none; color:inherit; }
+  img{ max-width:100%; display:block; }
+  button{ font-family:inherit; cursor:pointer; }
+  input, select, textarea{ font-family:inherit; font-size:14px; }
+  .wrap{ max-width:1240px; margin:0 auto; padding:0 32px; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 28px; font-weight:600; font-size:14.5px; border-radius:60px; border:none; transition:0.2s; }
+  .btn-primary{ background:var(--green); color:#fff; box-shadow:var(--shadow); }
+  .btn-primary:hover{ background:var(--green-dark); transform:scale(1.02); }
+  .btn-outline{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); }
+  .btn-outline:hover{ background:var(--ink); color:#fff; }
+  .btn-sm{ padding:9px 18px; font-size:13px; }
+
+  header{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Syne'; font-weight:700; font-size:18px; }
+  .brand .dot{ width:11px; height:11px; border-radius:50%; background:var(--green); }
+
+  .hero{ padding:64px 0 40px; background:linear-gradient(180deg,#f3f8f6,transparent); }
+  .hero .badge{ display:inline-block; background:var(--gold-light); color:#8a6417; font-size:12.5px; font-weight:600; padding:6px 14px; border-radius:20px; margin-bottom:16px; }
+  .hero h1{ font-size:clamp(28px,4vw,44px); max-width:680px; margin-bottom:14px; }
+  .hero p{ color:var(--ink-soft); max-width:560px; font-size:16px; }
+
+  .filters{ display:flex; gap:10px; flex-wrap:wrap; margin:28px 0 8px; align-items:center; }
+  .filters input, .filters select{ padding:11px 16px; border-radius:12px; border:1.5px solid var(--border); outline:none; }
+  .filters input:focus, .filters select:focus{ border-color:var(--green); }
+  .filters input{ flex:1; min-width:180px; }
+  .filter-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 26px; }
+  .filter-tab{ padding:8px 16px; border-radius:30px; border:1px solid var(--border); background:transparent; font-size:13.5px; font-weight:500; color:var(--ink-soft); }
+  .filter-tab.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .fleet-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; padding-bottom:70px; }
+  .car-card{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow); display:flex; flex-direction:column; }
+  .car-img{ height:180px; background:var(--bg-soft) center/cover no-repeat; position:relative; }
+  .car-img .status{ position:absolute; top:12px; left:12px; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:20px; text-transform:capitalize; }
+  .status-available{ background:#e4f5ee; color:var(--green-dark); }
+  .status-leased, .status-rented{ background:var(--gold-light); color:#8a6417; }
+  .status-maintenance{ background:#fdeceb; color:#c0392b; }
+  .car-body{ padding:18px 20px 20px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .car-body h3{ font-size:17px; }
+  .car-body .meta{ color:var(--ink-soft); font-size:13px; }
+  .car-specs{ display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); }
+  .price-row{ display:flex; justify-content:space-between; align-items:baseline; margin-top:auto; padding-top:8px; }
+  .price-row .price{ font-family:'Syne'; font-weight:700; font-size:17px; }
+  .price-row .price span{ font-family:'Inter'; font-weight:500; font-size:12px; color:var(--ink-soft); }
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--ink-soft); grid-column:1/-1; }
+
+  /* Modal */
+  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(11,26,26,0.55); z-index:200; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  .modal-overlay.show{ display:flex; }
+  .modal{ background:#fff; border-radius:24px; width:100%; max-width:520px; padding:32px; box-shadow:0 30px 60px rgba(0,0,0,0.25); position:relative; }
+  .modal-close{ position:absolute; top:20px; right:20px; background:none; border:none; font-size:20px; color:var(--ink-soft); }
+  .modal h3{ font-size:20px; margin-bottom:4px; }
+  .modal .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:20px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-soft); }
+  .field input, .field select, .field textarea{ width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; outline:none; }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--green); }
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .type-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .type-btn{ flex:1; padding:10px; border-radius:10px; border:1.5px solid var(--border); background:transparent; font-size:13.5px; font-weight:600; color:var(--ink-soft); }
+  .type-btn.active{ border-color:var(--green); background:#e4f5ee; color:var(--green-dark); }
+  .form-success{ display:none; text-align:center; padding:20px 0; }
+  .form-success.show{ display:block; }
+  .form-success.show ~ form{ display:none; }
+
+  footer{ background:var(--ink); color:rgba(255,255,255,0.75); padding:36px 0; margin-top:20px; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; font-size:13px; flex-wrap:wrap; gap:10px; }
+
+  @media (max-width:900px){ .fleet-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:600px){ .fleet-grid{ grid-template-columns:1fr; } .form-row{ grid-template-columns:1fr; } .wrap{ padding:0 20px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><div class="dot"></div>SIDITA Fleet</div>
+    <a href="https://sidita-rentals.com" class="btn btn-outline btn-sm">Main site</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="badge">live fleet</span>
+    <h1>Every vehicle we own — ready to rent, lease, or buy.</h1>
+    <p>Pick a vehicle below and send a request. A SIDITA advisor confirms availability and follows up with transparent, interest-free terms.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Search by name or brand…">
+    <select id="categoryFilter">
+      <option value="">All categories</option>
+      <option>SUV</option><option>Sedan</option><option>Truck</option><option>Van</option><option>Luxury</option><option>Compact</option>
+    </select>
+  </div>
+  <div class="filter-tabs" id="statusTabs">
+    <button class="filter-tab active" data-status="">All vehicles</button>
+    <button class="filter-tab" data-status="available">Available now</button>
+    <button class="filter-tab" data-status="leased">Leased</button>
+    <button class="filter-tab" data-status="rented">Rented</button>
+  </div>
+
+  <div class="fleet-grid" id="fleetGrid">
+    <div class="empty-state">Loading fleet…</div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 SIDITA Halal Rentals</span>
+    <span>Safe. Reliable. Comfort.</span>
+  </div>
+</footer>
+
+<!-- REQUEST MODAL -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal">
+    <button class="modal-close" id="closeModalBtn">&times;</button>
+    <h3 id="modalVehicleName">Vehicle</h3>
+    <p class="sub" id="modalVehicleMeta"></p>
+
+    <form id="requestForm">
+      <div class="type-toggle" id="typeToggle">
+        <button type="button" class="type-btn active" data-type="rental">Rent</button>
+        <button type="button" class="type-btn" data-type="lease">Lease</button>
+        <button type="button" class="type-btn" data-type="purchase">Buy</button>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Full name</label><input type="text" id="cName" required></div>
+        <div class="field"><label>Phone</label><input type="tel" id="cPhone" required></div>
+      </div>
+      <div class="field"><label>Email</label><input type="email" id="cEmail" required></div>
+      <div class="form-row" id="dateFields">
+        <div class="field"><label>Start date</label><input type="date" id="cStart"></div>
+        <div class="field"><label>End date</label><input type="date" id="cEnd"></div>
+      </div>
+      <div class="field"><label>Anything else?</label><textarea id="cNotes" rows="2" placeholder="Pickup city, questions..."></textarea></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Send request</button>
+    </form>
+    <div class="form-success" id="requestSuccess">
+      <h3>Request sent</h3>
+      <p style="color:var(--ink-soft);margin-top:6px;">A SIDITA advisor will reach out to confirm details shortly.</p>
+      <button class="btn btn-outline btn-sm" id="successCloseBtn" style="margin-top:16px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------------------------------------------------------------------
+  // Set this to your deployed backend URL once it's live on Render.
+  // ---------------------------------------------------------------------
+  const API_BASE = 'https://sidita-backend.onrender.com/api';
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  function fmtMoney(n){ return '₦' + Number(n||0).toLocaleString(); }
+
+  let allVehicles = [];
+  let currentStatus = '';
+  let selectedVehicle = null;
+  let selectedType = 'rental';
+
+  async function loadFleet(){
+    try {
+      const res = await fetch(API_BASE + '/vehicles');
+      if (!res.ok) throw new Error('Failed to load fleet (' + res.status + ')');
+      allVehicles = await res.json();
+      renderFleet();
+    } catch (err) {
+      $('#fleetGrid').innerHTML = `<div class="empty-state">Couldn't load the fleet right now (${err.message}). Please try again shortly.</div>`;
+    }
+  }
+
+  function renderFleet(){
+    const search = $('#searchInput').value.toLowerCase().trim();
+    const category = $('#categoryFilter').value;
+
+    const filtered = allVehicles.filter(v => {
+      if (currentStatus && v.status !== currentStatus) return false;
+      if (category && v.category !== category) return false;
+      if (search && !(v.name.toLowerCase().includes(search) || v.brand.toLowerCase().includes(search))) return false;
+      return true;
+    });
+
+    if (!filtered.length){
+      $('#fleetGrid').innerHTML = '<div class="empty-state">No vehicles match these filters yet.</div>';
+      return;
+    }
+
+    $('#fleetGrid').innerHTML = filtered.map(v => {
+      const img = v.images && v.images[0] ? v.images[0] : '';
+      const bg = img ? `background-image:url('${img}')` : '';
+      return `
+      <div class="car-card">
+        <div class="car-img" style="${bg}"><span class="status status-${v.status}">${v.status}</span></div>
+        <div class="car-body">
+          <h3>${v.name}</h3>
+          <div class="meta">${v.brand} · ${v.modelYear} · ${v.category}</div>
+          <div class="car-specs">
+            <span>${v.transmission || ''}</span><span>${v.fuelType || ''}</span><span>${v.seats||''} seats</span>
+          </div>
+          <div class="price-row">
+            <div class="price">${fmtMoney(v.dailyRentalRate)}<span>/day</span></div>
+            <button class="btn btn-primary btn-sm" data-request="${v._id}">Request</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    $$('[data-request]').forEach(btn => btn.addEventListener('click', () => openRequestModal(btn.dataset.request)));
+  }
+
+  $('#searchInput').addEventListener('input', renderFleet);
+  $('#categoryFilter').addEventListener('change', renderFleet);
+  $$('#statusTabs .filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      $$('#statusTabs .filter-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      currentStatus = tab.dataset.status;
+      renderFleet();
+    });
+  });
+
+  // ---------------- REQUEST MODAL ----------------
+  function openRequestModal(id){
+    selectedVehicle = allVehicles.find(v => v._id === id);
+    if (!selectedVehicle) return;
+    $('#modalVehicleName').textContent = selectedVehicle.name;
+    $('#modalVehicleMeta').textContent = `${selectedVehicle.brand} · ${selectedVehicle.modelYear} · ${fmtMoney(selectedVehicle.dailyRentalRate)}/day · ${fmtMoney(selectedVehicle.monthlyLeaseRate)}/month`;
+    $('#requestForm').reset();
+    $('#requestForm').style.display = 'block';
+    $('#requestSuccess').classList.remove('show');
+    selectedType = 'rental';
+    $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === 'rental'));
+    $('#requestModal').classList.add('show');
+  }
+  $('#closeModalBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
+  $('#successCloseBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
+
+  $$('.type-btn').forEach(btn => btn.addEventListener('click', () => {
+    $$('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedType = btn.dataset.type;
+    $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
+  }));
+
+  $('#requestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!selectedVehicle) return;
+    const payload = {
+      vehicle: selectedVehicle._id,
+      type: selectedType,
+      customerName: $('#cName').value,
+      customerEmail: $('#cEmail').value,
+      customerPhone: $('#cPhone').value,
+      startDate: $('#cStart').value || undefined,
+      endDate: $('#cEnd').value || undefined,
+      notes: $('#cNotes').value
+    };
+    try {
+      const res = await fetch(API_BASE + '/leases', {
+        method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not send request');
+      $('#requestForm').style.display = 'none';
+      $('#requestSuccess').classList.add('show');
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  });
+
+  loadFleet();
+})();
+</script>
+</body>
+</html>
