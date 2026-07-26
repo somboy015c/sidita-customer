@@ -5,118 +5,227 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIDITA Fleet — Lease, Rent or Buy</title>
 <meta name="description" content="Browse SIDITA Halal Rentals' full fleet and request a lease, rental, or purchase — transparent, interest-free terms.">
+<link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
-    --bg:#ffffff; --bg-soft:#f6f8f9; --ink:#0b1a1a; --ink-soft:#2f4040;
-    --green:#1a7a5a; --green-dark:#0e5f45; --gold:#d4a14b; --gold-light:#f3e3c4;
-    --border:rgba(0,0,0,0.08); --shadow:0 12px 30px rgba(0,0,0,0.05); --radius:24px;
+    --emerald:#0F7A54; --emerald-deep:#0A4E36; --emerald-light:#17915F; --emerald-tint:#E8F5EF;
+    --gold:#D4AA33; --gold-deep:#A9841A; --gold-light:#F6EDD3; --gold-pale:#F0D27A;
+    --ash:#F3F5F4; --ink:#0E1C19; --ink-soft:#54615D; --ink-faint:#8A9591;
+    --white-glass:rgba(255,255,255,0.72);
+    --border:rgba(14,28,25,0.09);
+    --shadow-sm:0 10px 26px rgba(14,28,25,0.07);
+    --shadow-md:0 26px 60px rgba(14,28,25,0.15);
+    --glow-emerald:0 18px 40px -12px rgba(15,122,84,0.4);
+    --glow-gold:0 14px 32px -10px rgba(212,170,51,0.5);
+    --grad-emerald:linear-gradient(135deg,#17915F 0%, #0A4E36 100%);
+    --grad-gold:linear-gradient(135deg,#F0D27A 0%, #D4AA33 55%, #A9841A 100%);
+    --grad-text-gold:linear-gradient(90deg,#F0D27A, #D4AA33);
+    --radius:22px;
   }
-  html{ -webkit-text-size-adjust:100%; }
+  html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
   body{
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    background:var(--bg); color:var(--ink); line-height:1.5;
+    color:var(--ink); line-height:1.55;
+    background-color:var(--ash);
+    background-image:
+      radial-gradient(circle at 10% 6%, rgba(15,122,84,0.06), transparent 40%),
+      radial-gradient(circle at 92% 96%, rgba(212,170,51,0.08), transparent 42%);
   }
-  h1,h2,h3,h4{ font-family:'Syne','Inter',sans-serif; font-weight:600; letter-spacing:-0.02em; line-height:1.15; }
+  h1,h2,h3,h4{ font-family:'Syne','Inter',sans-serif; font-weight:700; letter-spacing:-0.02em; line-height:1.15; }
   a{ text-decoration:none; color:inherit; }
   img{ max-width:100%; display:block; }
   button{ font-family:inherit; cursor:pointer; }
   input, select, textarea{ font-family:inherit; font-size:14px; }
-  .wrap{ max-width:1240px; margin:0 auto; padding:0 32px; }
+  ::selection{ background:var(--gold-light); }
+  .wrap{ max-width:1260px; margin:0 auto; padding:0 32px; }
+  .grad-text{ background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
   .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 28px; font-weight:600; font-size:14.5px; border-radius:60px; border:none; transition:0.2s; }
-  .btn-primary{ background:var(--green); color:#fff; box-shadow:var(--shadow); }
-  .btn-primary:hover{ background:var(--green-dark); transform:scale(1.02); }
-  .btn-outline{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); }
-  .btn-outline:hover{ background:var(--ink); color:#fff; }
-  .btn-sm{ padding:9px 18px; font-size:13px; }
+  .btn-primary{ background:var(--grad-emerald); color:#fff; box-shadow:var(--glow-emerald); }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 22px 46px -10px rgba(15,122,84,0.5); }
+  .btn-gold{ background:var(--grad-gold); color:#2b2308; box-shadow:var(--glow-gold); }
+  .btn-gold:hover{ transform:translateY(-2px); box-shadow:0 18px 38px -8px rgba(212,170,51,0.6); }
+  .btn-outline{ background:rgba(255,255,255,0.1); border:1.5px solid rgba(255,255,255,0.55); color:#fff; backdrop-filter:blur(6px); }
+  .btn-outline:hover{ background:#fff; color:var(--ink); }
+  .btn-outline-dark{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); }
+  .btn-outline-dark:hover{ background:var(--ink); color:#fff; }
+  .btn-sm{ padding:10px 18px; font-size:13px; }
+  .btn-block{ width:100%; }
 
-  header{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
-  .nav{ display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
-  .brand{ display:flex; align-items:center; gap:10px; font-family:'Syne'; font-weight:700; font-size:18px; }
-  .brand .dot{ width:11px; height:11px; border-radius:50%; background:var(--green); }
+  .logo-plate{ background:#fff; border-radius:14px; padding:5px 10px; display:inline-flex; align-items:center; box-shadow:0 8px 18px rgba(0,0,0,0.14); }
+  .logo-plate img{ height:34px; width:auto; display:block; }
+  .logo-fallback{ display:none; width:34px; height:34px; border-radius:8px; background:var(--grad-gold); color:var(--emerald-deep); align-items:center; justify-content:center; font-family:'Syne'; font-weight:800; font-size:14px; }
+  .logo-bare img{ height:36px; width:auto; display:block; }
 
-  .hero{ padding:64px 0 40px; background:linear-gradient(180deg,#f3f8f6,transparent); }
-  .hero .badge{ display:inline-block; background:var(--gold-light); color:#8a6417; font-size:12.5px; font-weight:600; padding:6px 14px; border-radius:20px; margin-bottom:16px; }
-  .hero h1{ font-size:clamp(28px,4vw,44px); max-width:680px; margin-bottom:14px; }
-  .hero p{ color:var(--ink-soft); max-width:560px; font-size:16px; }
+  /* ---------- Header ---------- */
+  header{ position:sticky; top:0; z-index:100; background:var(--white-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:13px 0; }
+  .nav-links{ display:flex; align-items:center; gap:30px; list-style:none; }
+  .nav-links a{ font-size:14px; font-weight:500; color:var(--ink-soft); transition:0.2s; }
+  .nav-links a:hover{ color:var(--emerald); }
+  .nav-right{ display:flex; align-items:center; gap:14px; }
+  .mobile-toggle{ display:none; background:none; border:none; flex-direction:column; gap:4px; padding:6px; }
+  .mobile-toggle span{ width:22px; height:2px; background:var(--ink); border-radius:3px; }
+  .mobile-panel{ display:none; background:#fff; border-bottom:1px solid var(--border); padding:16px 0; }
+  .mobile-panel.show{ display:block; }
+  .mobile-panel .wrap{ display:flex; flex-direction:column; gap:14px; }
+  .mobile-panel a{ font-size:15px; font-weight:500; }
 
-  .filters{ display:flex; gap:10px; flex-wrap:wrap; margin:28px 0 8px; align-items:center; }
-  .filters input, .filters select{ padding:11px 16px; border-radius:12px; border:1.5px solid var(--border); outline:none; }
-  .filters input:focus, .filters select:focus{ border-color:var(--green); }
-  .filters input{ flex:1; min-width:180px; }
-  .filter-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 26px; }
-  .filter-tab{ padding:8px 16px; border-radius:30px; border:1px solid var(--border); background:transparent; font-size:13.5px; font-weight:500; color:var(--ink-soft); }
-  .filter-tab.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; padding:100px 0 64px; overflow:hidden; color:#fff;
+    background:
+      linear-gradient(100deg, rgba(7,15,13,0.92) 8%, rgba(15,122,84,0.55) 58%, rgba(15,122,84,0.18) 100%),
+      url('https://images.unsplash.com/photo-1755288348835-dc6c29852299?fm=jpg&q=80&w=2200&auto=format&fit=crop') center/cover no-repeat;
+  }
+  .hero::before, .hero::after{ content:''; position:absolute; border-radius:50%; filter:blur(80px); z-index:0; pointer-events:none; }
+  .hero::before{ width:500px; height:500px; background:radial-gradient(circle, rgba(212,170,51,0.32), transparent 70%); top:-160px; right:6%; }
+  .hero::after{ width:440px; height:440px; background:radial-gradient(circle, rgba(23,145,95,0.55), transparent 70%); bottom:-200px; left:8%; }
+  .hero .wrap{ position:relative; z-index:1; }
+  .hero .badge{ display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.32); color:#fff; font-size:12.5px; font-weight:600; padding:7px 15px; border-radius:22px; margin-bottom:18px; backdrop-filter:blur(6px); }
+  .hero .badge .dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px var(--gold); }
+  .hero h1{ font-size:clamp(30px,4.4vw,50px); max-width:700px; margin-bottom:16px; }
+  .hero h1 span{ background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p{ color:rgba(255,255,255,0.82); max-width:540px; font-size:16px; margin-bottom:26px; }
+  .hero-stats{ display:flex; gap:34px; margin-top:36px; flex-wrap:wrap; }
+  .hero-stats div strong{ display:block; font-family:'Syne'; font-size:24px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero-stats div span{ font-size:12.5px; color:rgba(255,255,255,0.7); }
 
-  .fleet-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; padding-bottom:70px; }
-  .car-card{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow); display:flex; flex-direction:column; }
-  .car-img{ height:180px; background:var(--bg-soft) center/cover no-repeat; position:relative; }
-  .car-img .status{ position:absolute; top:12px; left:12px; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:20px; text-transform:capitalize; }
-  .status-available{ background:#e4f5ee; color:var(--green-dark); }
-  .status-leased, .status-rented{ background:var(--gold-light); color:#8a6417; }
-  .status-maintenance{ background:#fdeceb; color:#c0392b; }
-  .car-body{ padding:18px 20px 20px; display:flex; flex-direction:column; gap:10px; flex:1; }
-  .car-body h3{ font-size:17px; }
+  /* ---------- Filters ---------- */
+  .filter-bar{ background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-md); border:1px solid var(--border); padding:18px 22px; margin-top:-40px; position:relative; z-index:10; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .filter-bar::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; border-radius:22px 22px 0 0; background:var(--grad-gold); }
+  .filter-bar input, .filter-bar select{ padding:12px 16px; border-radius:12px; border:1.5px solid var(--border); outline:none; background:var(--ash); }
+  .filter-bar input:focus, .filter-bar select:focus{ border-color:var(--emerald); background:#fff; }
+  .filter-bar input{ flex:1; min-width:180px; }
+  .filter-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 30px; }
+  .filter-tab{ padding:9px 18px; border-radius:30px; border:1px solid var(--border); background:#fff; font-size:13px; font-weight:600; color:var(--ink-soft); }
+  .filter-tab.active{ background:var(--grad-emerald); color:#fff; border-color:transparent; }
+
+  /* ---------- Fleet grid ---------- */
+  .fleet-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding-bottom:76px; }
+  .car-card{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; transition:0.25s; }
+  .car-card:hover{ box-shadow:0 28px 55px -14px rgba(15,122,84,0.28); transform:translateY(-4px); }
+  .car-img{ height:190px; background:var(--ash) center/cover no-repeat; position:relative; }
+  .car-img::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 55%, rgba(14,28,25,0.4) 100%); }
+  .car-img .status{ position:absolute; top:13px; left:13px; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; text-transform:capitalize; z-index:2; }
+  .status-available{ background:var(--emerald-tint); color:var(--emerald-deep); }
+  .status-leased, .status-rented{ background:var(--gold-light); color:var(--gold-deep); }
+  .status-maintenance{ background:#fbeae7; color:#B3392C; }
+  .car-body{ padding:20px 22px 22px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .car-body h3{ font-size:17.5px; }
   .car-body .meta{ color:var(--ink-soft); font-size:13px; }
-  .car-specs{ display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); }
-  .price-row{ display:flex; justify-content:space-between; align-items:baseline; margin-top:auto; padding-top:8px; }
-  .price-row .price{ font-family:'Syne'; font-weight:700; font-size:17px; }
-  .price-row .price span{ font-family:'Inter'; font-weight:500; font-size:12px; color:var(--ink-soft); }
-  .empty-state{ text-align:center; padding:60px 20px; color:var(--ink-soft); grid-column:1/-1; }
+  .car-specs{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); }
+  .car-specs span{ display:flex; align-items:center; gap:5px; }
+  .price-row{ display:flex; justify-content:space-between; align-items:baseline; margin-top:auto; padding-top:10px; border-top:1px dashed var(--border); }
+  .price-row .price{ font-family:'Syne'; font-weight:700; font-size:17px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .price-row .price span{ font-family:'Inter'; font-weight:500; font-size:12px; color:var(--ink-soft); -webkit-text-fill-color:var(--ink-soft); }
+  .empty-state{ text-align:center; padding:70px 20px; color:var(--ink-soft); grid-column:1/-1; background:#fff; border-radius:var(--radius); border:1px solid var(--border); }
 
-  /* Modal */
-  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(11,26,26,0.55); z-index:200; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  /* ---------- Modal ---------- */
+  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(14,28,25,0.6); backdrop-filter:blur(3px); z-index:200; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
   .modal-overlay.show{ display:flex; }
-  .modal{ background:#fff; border-radius:24px; width:100%; max-width:520px; padding:32px; box-shadow:0 30px 60px rgba(0,0,0,0.25); position:relative; }
-  .modal-close{ position:absolute; top:20px; right:20px; background:none; border:none; font-size:20px; color:var(--ink-soft); }
-  .modal h3{ font-size:20px; margin-bottom:4px; }
-  .modal .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:20px; }
+  .modal{ background:#fff; border-radius:24px; width:100%; max-width:520px; padding:34px; box-shadow:0 30px 70px rgba(0,0,0,0.3); position:relative; overflow:hidden; }
+  .modal::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--grad-gold); }
+  .modal-close{ position:absolute; top:20px; right:20px; background:var(--ash); border:none; width:32px; height:32px; border-radius:50%; font-size:18px; color:var(--ink-soft); }
+  .modal h3{ font-size:20px; margin:10px 0 4px; }
+  .modal .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:22px; }
   .field{ margin-bottom:14px; }
   .field label{ display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink-soft); }
   .field input, .field select, .field textarea{ width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; outline:none; }
-  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--green); }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--emerald); }
   .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .type-toggle{ display:flex; gap:8px; margin-bottom:16px; }
-  .type-btn{ flex:1; padding:10px; border-radius:10px; border:1.5px solid var(--border); background:transparent; font-size:13.5px; font-weight:600; color:var(--ink-soft); }
-  .type-btn.active{ border-color:var(--green); background:#e4f5ee; color:var(--green-dark); }
-  .form-success{ display:none; text-align:center; padding:20px 0; }
+  .type-toggle{ display:flex; gap:8px; margin-bottom:18px; }
+  .type-btn{ flex:1; padding:11px; border-radius:10px; border:1.5px solid var(--border); background:transparent; font-size:13.5px; font-weight:600; color:var(--ink-soft); }
+  .type-btn.active{ border-color:var(--emerald); background:var(--emerald-tint); color:var(--emerald-deep); }
+  .form-success{ display:none; text-align:center; padding:24px 0; }
   .form-success.show{ display:block; }
   .form-success.show ~ form{ display:none; }
+  .form-success .check{ width:54px; height:54px; border-radius:50%; background:var(--grad-emerald); box-shadow:var(--glow-emerald); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
 
-  footer{ background:var(--ink); color:rgba(255,255,255,0.75); padding:36px 0; margin-top:20px; }
-  footer .wrap{ display:flex; justify-content:space-between; align-items:center; font-size:13px; flex-wrap:wrap; gap:10px; }
+  /* ---------- How it works ---------- */
+  .how-section{ padding:64px 0 74px; }
+  .section-head{ text-align:center; max-width:600px; margin:0 auto 40px; }
+  .section-head .eyebrow{ display:inline-block; background:var(--gold-light); color:var(--gold-deep); font-size:12px; font-weight:700; padding:6px 14px; border-radius:20px; margin-bottom:14px; }
+  .how-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .how-card{ background:#fff; border-radius:var(--radius); padding:26px 24px; border:1px solid var(--border); box-shadow:var(--shadow-sm); position:relative; overflow:hidden; transition:0.2s; }
+  .how-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .how-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--grad-emerald); }
+  .how-card .num{ font-family:'Syne'; font-weight:800; font-size:28px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:10px; }
+  .how-card h4{ font-size:16px; margin-bottom:8px; }
+  .how-card p{ font-size:13.5px; color:var(--ink-soft); }
 
-  @media (max-width:900px){ .fleet-grid{ grid-template-columns:1fr 1fr; } }
-  @media (max-width:600px){ .fleet-grid{ grid-template-columns:1fr; } .form-row{ grid-template-columns:1fr; } .wrap{ padding:0 20px; } }
+  /* ---------- Footer ---------- */
+  footer{ background:var(--grad-emerald); color:rgba(255,255,255,0.82); padding:44px 0 26px; margin-top:20px; position:relative; overflow:hidden; }
+  footer::before{ content:''; position:absolute; width:360px; height:360px; border-radius:50%; top:-140px; right:-40px; background:radial-gradient(circle, rgba(212,170,51,0.25), transparent 70%); filter:blur(10px); }
+  footer .wrap{ position:relative; z-index:1; }
+  footer .foot-top{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; padding-bottom:26px; border-bottom:1px solid rgba(255,255,255,0.15); }
+  footer .foot-bottom{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding-top:20px; flex-wrap:wrap; gap:10px; color:rgba(255,255,255,0.6); }
+
+  @media (max-width:980px){
+    .nav-links{ display:none; }
+    .mobile-toggle{ display:flex; }
+    .fleet-grid{ grid-template-columns:1fr 1fr; }
+    .how-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:640px){
+    .wrap{ padding:0 20px; }
+    .fleet-grid{ grid-template-columns:1fr; }
+    .form-row{ grid-template-columns:1fr; }
+    .hero{ padding:80px 0 54px; }
+    .hero-stats{ gap:22px; }
+    .filter-bar{ margin-top:-26px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap nav">
-    <div class="brand"><div class="dot"></div>SIDITA Fleet</div>
-    <a href="https://sidita-rentals.com" class="btn btn-outline btn-sm">Main site</a>
+    <div class="logo-bare">
+      <img src="logo.png" alt="SIDITA" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="logo-fallback">S</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#fleet">Fleet</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="https://sidita-rentals.com">Main site</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="mobile-toggle" id="mobileToggle"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-panel" id="mobilePanel">
+    <div class="wrap">
+      <a href="#fleet">Fleet</a>
+      <a href="#how">How it works</a>
+      <a href="https://sidita-rentals.com">Main site</a>
+    </div>
   </div>
 </header>
 
 <section class="hero">
   <div class="wrap">
-    <span class="badge">live fleet</span>
-    <h1>Every vehicle we own — ready to rent, lease, or buy.</h1>
+    <span class="badge"><span class="dot"></span>Live fleet</span>
+    <h1>Every vehicle we own — ready to <span>rent, lease, or buy</span>.</h1>
     <p>Pick a vehicle below and send a request. A SIDITA advisor confirms availability and follows up with transparent, interest-free terms.</p>
+    <a href="#fleet" class="btn btn-gold">Browse the fleet</a>
+    <div class="hero-stats">
+      <div><strong id="heroTotalCount">–</strong><span>Vehicles listed</span></div>
+      <div><strong id="heroAvailableCount">–</strong><span>Available now</span></div>
+      <div><strong>0%</strong><span>Interest, always</span></div>
+    </div>
   </div>
 </section>
 
-<div class="wrap">
-  <div class="filters">
+<div class="wrap" id="fleet">
+  <div class="filter-bar">
     <input type="text" id="searchInput" placeholder="Search by name or brand…">
     <select id="categoryFilter">
       <option value="">All categories</option>
-      <option>SUV</option><option>Sedan</option><option>Truck</option><option>Van</option><option>Luxury</option><option>Compact</option>
     </select>
   </div>
   <div class="filter-tabs" id="statusTabs">
@@ -131,10 +240,33 @@
   </div>
 </div>
 
+<section class="how-section" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">how it works</span>
+      <h2>From request to keys in hand.</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-card"><div class="num">01</div><h4>Choose a vehicle</h4><p>Browse the live fleet above and pick one that fits — filter by category or availability.</p></div>
+      <div class="how-card"><div class="num">02</div><h4>Send a request</h4><p>Tell us whether you want to rent, lease, or buy, plus your dates. Takes under a minute.</p></div>
+      <div class="how-card"><div class="num">03</div><h4>We confirm the details</h4><p>A SIDITA advisor calls or emails you with clear, interest-free terms — no surprises.</p></div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
-    <span>© 2026 SIDITA Halal Rentals</span>
-    <span>Safe. Reliable. Comfort.</span>
+    <div class="foot-top">
+      <div class="logo-plate">
+        <img src="logo.png" alt="SIDITA" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="logo-fallback">S</div>
+      </div>
+      <a href="https://sidita-rentals.com" class="btn btn-outline btn-sm">Visit main site</a>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 SIDITA Halal Rentals</span>
+      <span>Safe. Reliable. Comfort.</span>
+    </div>
   </div>
 </footer>
 
@@ -161,12 +293,13 @@
         <div class="field"><label>End date</label><input type="date" id="cEnd"></div>
       </div>
       <div class="field"><label>Anything else?</label><textarea id="cNotes" rows="2" placeholder="Pickup city, questions..."></textarea></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;">Send request</button>
+      <button type="submit" class="btn btn-primary btn-block">Send request</button>
     </form>
     <div class="form-success" id="requestSuccess">
+      <div class="check"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
       <h3>Request sent</h3>
       <p style="color:var(--ink-soft);margin-top:6px;">A SIDITA advisor will reach out to confirm details shortly.</p>
-      <button class="btn btn-outline btn-sm" id="successCloseBtn" style="margin-top:16px;">Close</button>
+      <button class="btn btn-outline-dark btn-sm" id="successCloseBtn" style="margin-top:18px;">Close</button>
     </div>
   </div>
 </div>
@@ -181,18 +314,39 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  function fmtMoney(n){ return '₦' + Number(n||0).toLocaleString(); }
+  let siteCurrency = { code: 'NGN', symbol: '₦' };
+  function fmtMoney(n){ return siteCurrency.symbol + Number(n||0).toLocaleString(); }
+
+  async function loadSiteSettings(){
+    try {
+      const res = await fetch(API_BASE + '/settings');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.currency) siteCurrency = data.currency;
+      const categories = data.vehicleCategories || [];
+      $('#categoryFilter').innerHTML = '<option value="">All categories</option>' +
+        categories.map(c => `<option>${c}</option>`).join('');
+    } catch (err) { /* non-critical — fall back to defaults */ }
+  }
 
   let allVehicles = [];
   let currentStatus = '';
   let selectedVehicle = null;
   let selectedType = 'rental';
 
+  // ---------------- Mobile nav ----------------
+  const mobileToggle = $('#mobileToggle');
+  const mobilePanel = $('#mobilePanel');
+  mobileToggle.addEventListener('click', () => mobilePanel.classList.toggle('show'));
+  $$('.mobile-panel a').forEach(a => a.addEventListener('click', () => mobilePanel.classList.remove('show')));
+
   async function loadFleet(){
     try {
       const res = await fetch(API_BASE + '/vehicles');
       if (!res.ok) throw new Error('Failed to load fleet (' + res.status + ')');
       allVehicles = await res.json();
+      $('#heroTotalCount').textContent = allVehicles.length;
+      $('#heroAvailableCount').textContent = allVehicles.filter(v => v.status === 'available').length;
       renderFleet();
     } catch (err) {
       $('#fleetGrid').innerHTML = `<div class="empty-state">Couldn't load the fleet right now (${err.message}). Please try again shortly.</div>`;
@@ -229,7 +383,7 @@
           </div>
           <div class="price-row">
             <div class="price">${fmtMoney(v.dailyRentalRate)}<span>/day</span></div>
-            <button class="btn btn-primary btn-sm" data-request="${v._id}">Request</button>
+            <button class="btn btn-gold btn-sm" data-request="${v._id}">Request</button>
           </div>
         </div>
       </div>`;
@@ -260,6 +414,7 @@
     $('#requestSuccess').classList.remove('show');
     selectedType = 'rental';
     $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === 'rental'));
+    $('#dateFields').style.display = 'grid';
     $('#requestModal').classList.add('show');
   }
   $('#closeModalBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
@@ -298,7 +453,7 @@
     }
   });
 
-  loadFleet();
+  Promise.all([loadSiteSettings(), loadFleet()]).then(() => renderFleet());
 })();
 </script>
 </body>
