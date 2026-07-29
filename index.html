@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
@@ -53,13 +54,14 @@
   .btn-outline:hover{ background:#fff; color:var(--ink); }
   .btn-outline-dark{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); }
   .btn-outline-dark:hover{ background:var(--ink); color:#fff; }
-  .btn-sm{ padding:10px 18px; font-size:13px; }
   .btn-block{ width:100%; }
+  .btn-sm{ padding:10px 18px; font-size:13px; }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
 
   .logo-plate{ background:#fff; border-radius:14px; padding:5px 10px; display:inline-flex; align-items:center; box-shadow:0 8px 18px rgba(0,0,0,0.14); }
-  .logo-plate img{ height:34px; width:auto; display:block; }
   .logo-fallback{ display:none; width:34px; height:34px; border-radius:8px; background:var(--grad-gold); color:var(--emerald-deep); align-items:center; justify-content:center; font-family:'Syne'; font-weight:800; font-size:14px; }
   .logo-bare img{ height:36px; width:auto; display:block; }
+  .logo-bare{ display:flex; align-items:center; }
 
   /* ---------- Header ---------- */
   header{ position:sticky; top:0; z-index:100; background:var(--white-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
@@ -67,7 +69,6 @@
   .nav-links{ display:flex; align-items:center; gap:30px; list-style:none; }
   .nav-links a{ font-size:14px; font-weight:500; color:var(--ink-soft); transition:0.2s; }
   .nav-links a:hover{ color:var(--emerald); }
-  .nav-right{ display:flex; align-items:center; gap:14px; }
   .mobile-toggle{ display:none; background:none; border:none; flex-direction:column; gap:4px; padding:6px; }
   .mobile-toggle span{ width:22px; height:2px; background:var(--ink); border-radius:3px; }
   .mobile-panel{ display:none; background:#fff; border-bottom:1px solid var(--border); padding:16px 0; }
@@ -77,7 +78,7 @@
 
   /* ---------- Hero ---------- */
   .hero{
-    position:relative; padding:100px 0 64px; overflow:hidden; color:#fff;
+    position:relative; padding:80px 0 56px; overflow:hidden; color:#fff;
     background:
       linear-gradient(100deg, rgba(7,15,13,0.92) 8%, rgba(15,122,84,0.55) 58%, rgba(15,122,84,0.18) 100%),
       url('https://images.unsplash.com/photo-1755288348835-dc6c29852299?fm=jpg&q=80&w=2200&auto=format&fit=crop') center/cover no-repeat;
@@ -88,11 +89,11 @@
   .hero .wrap{ position:relative; z-index:1; }
   .hero .badge{ display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.32); color:#fff; font-size:12.5px; font-weight:600; padding:7px 15px; border-radius:22px; margin-bottom:18px; backdrop-filter:blur(6px); }
   .hero .badge .dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px var(--gold); }
-  .hero h1{ font-size:clamp(30px,4.4vw,50px); max-width:700px; margin-bottom:16px; }
+  .hero h1{ font-size:clamp(28px,4vw,46px); max-width:700px; margin-bottom:14px; }
   .hero h1 span{ background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .hero p{ color:rgba(255,255,255,0.82); max-width:540px; font-size:16px; margin-bottom:26px; }
-  .hero-stats{ display:flex; gap:34px; margin-top:36px; flex-wrap:wrap; }
-  .hero-stats div strong{ display:block; font-family:'Syne'; font-size:24px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p{ color:rgba(255,255,255,0.82); max-width:540px; font-size:15.5px; margin-bottom:24px; }
+  .hero-stats{ display:flex; gap:34px; margin-top:30px; flex-wrap:wrap; }
+  .hero-stats div strong{ display:block; font-family:'Syne'; font-size:23px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .hero-stats div span{ font-size:12.5px; color:rgba(255,255,255,0.7); }
 
   /* ---------- Filters ---------- */
@@ -104,17 +105,22 @@
   .filter-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 30px; }
   .filter-tab{ padding:9px 18px; border-radius:30px; border:1px solid var(--border); background:#fff; font-size:13px; font-weight:600; color:var(--ink-soft); }
   .filter-tab.active{ background:var(--grad-emerald); color:#fff; border-color:transparent; }
+  .filter-tab.gold-active.active{ background:var(--grad-gold); color:#2b2308; }
+  .results-count{ color:var(--ink-soft); font-size:13px; margin-bottom:14px; }
 
-  /* ---------- Fleet grid ---------- */
+  /* ---------- Fleet grid (product cards) ---------- */
   .fleet-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding-bottom:76px; }
-  .car-card{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; transition:0.25s; }
+  .car-card{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:#fff; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; transition:0.25s; cursor:pointer; }
   .car-card:hover{ box-shadow:0 28px 55px -14px rgba(15,122,84,0.28); transform:translateY(-4px); }
   .car-img{ height:190px; background:var(--ash) center/cover no-repeat; position:relative; }
   .car-img::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 55%, rgba(14,28,25,0.4) 100%); }
-  .car-img .status{ position:absolute; top:13px; left:13px; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; text-transform:capitalize; z-index:2; }
+  .car-img .badges{ position:absolute; top:13px; left:13px; right:13px; display:flex; justify-content:space-between; z-index:2; }
+  .pill{ font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; text-transform:capitalize; }
   .status-available{ background:var(--emerald-tint); color:var(--emerald-deep); }
   .status-leased, .status-rented{ background:var(--gold-light); color:var(--gold-deep); }
   .status-maintenance{ background:#fbeae7; color:#B3392C; }
+  .pill-forsale{ background:var(--grad-gold); color:#2b2308; }
+  .car-img .photo-count{ position:absolute; bottom:10px; right:10px; background:rgba(14,28,25,0.55); color:#fff; font-size:11px; font-weight:600; padding:4px 9px; border-radius:20px; z-index:2; backdrop-filter:blur(4px); }
   .car-body{ padding:20px 22px 22px; display:flex; flex-direction:column; gap:10px; flex:1; }
   .car-body h3{ font-size:17.5px; }
   .car-body .meta{ color:var(--ink-soft); font-size:13px; }
@@ -125,8 +131,33 @@
   .price-row .price span{ font-family:'Inter'; font-weight:500; font-size:12px; color:var(--ink-soft); -webkit-text-fill-color:var(--ink-soft); }
   .empty-state{ text-align:center; padding:70px 20px; color:var(--ink-soft); grid-column:1/-1; background:#fff; border-radius:var(--radius); border:1px solid var(--border); }
 
-  /* ---------- Modal ---------- */
-  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(14,28,25,0.6); backdrop-filter:blur(3px); z-index:200; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  /* ---------- Product Detail Overlay ---------- */
+  .detail-overlay{ display:none; position:fixed; inset:0; background:rgba(14,28,25,0.6); backdrop-filter:blur(3px); z-index:250; overflow-y:auto; padding:30px 16px; }
+  .detail-overlay.show{ display:block; }
+  .detail-card{ background:#fff; border-radius:28px; max-width:1040px; margin:0 auto; box-shadow:0 40px 90px rgba(0,0,0,0.3); position:relative; overflow:hidden; }
+  .detail-close{ position:absolute; top:18px; right:18px; z-index:5; width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; font-size:20px; color:var(--ink); box-shadow:var(--shadow-sm); }
+  .detail-grid{ display:grid; grid-template-columns:1.1fr 1fr; gap:0; }
+  .detail-gallery{ padding:26px; background:var(--ash); }
+  .detail-main-img{ width:100%; height:340px; object-fit:cover; border-radius:18px; background:#e5e8e8; margin-bottom:14px; }
+  .detail-thumbs{ display:flex; gap:10px; flex-wrap:wrap; }
+  .detail-thumbs img{ width:64px; height:64px; object-fit:cover; border-radius:10px; cursor:pointer; border:2px solid transparent; opacity:0.7; transition:0.15s; }
+  .detail-thumbs img.active{ border-color:var(--emerald); opacity:1; }
+  .detail-info{ padding:34px 34px 34px 8px; display:flex; flex-direction:column; }
+  .detail-badges{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .detail-info h2{ font-size:26px; margin-bottom:4px; }
+  .detail-info .meta{ color:var(--ink-soft); font-size:14px; margin-bottom:18px; }
+  .detail-specs{ display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:20px; }
+  .detail-specs .spec-item{ font-size:13px; }
+  .detail-specs .spec-label{ color:var(--ink-faint); display:block; font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px; }
+  .detail-desc{ color:var(--ink-soft); font-size:14px; margin-bottom:22px; }
+  .detail-price-panel{ background:var(--ash); border-radius:16px; padding:18px 20px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:18px; }
+  .detail-price-panel .p-item strong{ display:block; font-family:'Syne'; font-size:19px; background:var(--grad-text-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .detail-price-panel .p-item span{ font-size:11.5px; color:var(--ink-soft); }
+  .detail-cta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:auto; }
+  .detail-cta .btn{ flex:1; min-width:120px; }
+
+  /* ---------- Modal (request form) ---------- */
+  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(14,28,25,0.6); backdrop-filter:blur(3px); z-index:300; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
   .modal-overlay.show{ display:flex; }
   .modal{ background:#fff; border-radius:24px; width:100%; max-width:520px; padding:34px; box-shadow:0 30px 70px rgba(0,0,0,0.3); position:relative; overflow:hidden; }
   .modal::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--grad-gold); }
@@ -141,6 +172,7 @@
   .type-toggle{ display:flex; gap:8px; margin-bottom:18px; }
   .type-btn{ flex:1; padding:11px; border-radius:10px; border:1.5px solid var(--border); background:transparent; font-size:13.5px; font-weight:600; color:var(--ink-soft); }
   .type-btn.active{ border-color:var(--emerald); background:var(--emerald-tint); color:var(--emerald-deep); }
+  .type-btn:disabled{ opacity:0.35; cursor:not-allowed; }
   .form-success{ display:none; text-align:center; padding:24px 0; }
   .form-success.show{ display:block; }
   .form-success.show ~ form{ display:none; }
@@ -170,14 +202,18 @@
     .mobile-toggle{ display:flex; }
     .fleet-grid{ grid-template-columns:1fr 1fr; }
     .how-grid{ grid-template-columns:1fr; }
+    .detail-grid{ grid-template-columns:1fr; }
+    .detail-info{ padding:8px 26px 30px; }
+    .detail-gallery{ padding:26px 26px 0; }
   }
   @media (max-width:640px){
     .wrap{ padding:0 20px; }
     .fleet-grid{ grid-template-columns:1fr; }
     .form-row{ grid-template-columns:1fr; }
-    .hero{ padding:80px 0 54px; }
+    .hero{ padding:70px 0 46px; }
     .hero-stats{ gap:22px; }
     .filter-bar{ margin-top:-26px; }
+    .detail-main-img{ height:220px; }
   }
 </style>
 </head>
@@ -211,12 +247,12 @@
   <div class="wrap">
     <span class="badge"><span class="dot"></span>Live fleet</span>
     <h1>Every vehicle we own — ready to <span>rent, lease, or buy</span>.</h1>
-    <p>Pick a vehicle below and send a request. A SIDITA advisor confirms availability and follows up with transparent, interest-free terms.</p>
+    <p>Click any vehicle to see full details and photos, then send a request. A SIDITA advisor confirms availability and follows up with transparent, interest-free terms.</p>
     <a href="#fleet" class="btn btn-gold">Browse the fleet</a>
     <div class="hero-stats">
       <div><strong id="heroTotalCount">–</strong><span>Vehicles listed</span></div>
       <div><strong id="heroAvailableCount">–</strong><span>Available now</span></div>
-      <div><strong>0%</strong><span>Interest, always</span></div>
+      <div><strong id="heroForSaleCount">–</strong><span>For sale</span></div>
     </div>
   </div>
 </section>
@@ -231,9 +267,11 @@
   <div class="filter-tabs" id="statusTabs">
     <button class="filter-tab active" data-status="">All vehicles</button>
     <button class="filter-tab" data-status="available">Available now</button>
+    <button class="filter-tab gold-active" data-status="forsale">For sale</button>
     <button class="filter-tab" data-status="leased">Leased</button>
     <button class="filter-tab" data-status="rented">Rented</button>
   </div>
+  <p class="results-count" id="resultsCount"></p>
 
   <div class="fleet-grid" id="fleetGrid">
     <div class="empty-state">Loading fleet…</div>
@@ -247,7 +285,7 @@
       <h2>From request to keys in hand.</h2>
     </div>
     <div class="how-grid">
-      <div class="how-card"><div class="num">01</div><h4>Choose a vehicle</h4><p>Browse the live fleet above and pick one that fits — filter by category or availability.</p></div>
+      <div class="how-card"><div class="num">01</div><h4>Choose a vehicle</h4><p>Browse the live fleet above and click one to see full details, specs, and every photo.</p></div>
       <div class="how-card"><div class="num">02</div><h4>Send a request</h4><p>Tell us whether you want to rent, lease, or buy, plus your dates. Takes under a minute.</p></div>
       <div class="how-card"><div class="num">03</div><h4>We confirm the details</h4><p>A SIDITA advisor calls or emails you with clear, interest-free terms — no surprises.</p></div>
     </div>
@@ -269,6 +307,28 @@
     </div>
   </div>
 </footer>
+
+<!-- PRODUCT DETAIL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-card">
+    <button class="detail-close" id="detailCloseBtn">&times;</button>
+    <div class="detail-grid">
+      <div class="detail-gallery">
+        <img class="detail-main-img" id="detailMainImg" src="" alt="">
+        <div class="detail-thumbs" id="detailThumbs"></div>
+      </div>
+      <div class="detail-info">
+        <div class="detail-badges" id="detailBadges"></div>
+        <h2 id="detailName">Vehicle</h2>
+        <div class="meta" id="detailMeta"></div>
+        <div class="detail-specs" id="detailSpecs"></div>
+        <p class="detail-desc" id="detailDesc"></p>
+        <div class="detail-price-panel" id="detailPricePanel"></div>
+        <div class="detail-cta" id="detailCta"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- REQUEST MODAL -->
 <div class="modal-overlay" id="requestModal">
@@ -313,6 +373,9 @@
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23e5e8e8"/><text x="50%" y="50%" font-family="sans-serif" font-size="18" fill="%238a9591" text-anchor="middle" dy=".3em">No photo yet</text></svg>'
+  );
 
   let siteCurrency = { code: 'NGN', symbol: '₦' };
   function fmtMoney(n){ return siteCurrency.symbol + Number(n||0).toLocaleString(); }
@@ -333,6 +396,7 @@
   let currentStatus = '';
   let selectedVehicle = null;
   let selectedType = 'rental';
+  let detailImages = [];
 
   // ---------------- Mobile nav ----------------
   const mobileToggle = $('#mobileToggle');
@@ -347,7 +411,9 @@
       allVehicles = await res.json();
       $('#heroTotalCount').textContent = allVehicles.length;
       $('#heroAvailableCount').textContent = allVehicles.filter(v => v.status === 'available').length;
+      $('#heroForSaleCount').textContent = allVehicles.filter(v => v.listingStatus === 'For Sale').length;
       renderFleet();
+      maybeOpenFromHash();
     } catch (err) {
       $('#fleetGrid').innerHTML = `<div class="empty-state">Couldn't load the fleet right now (${err.message}). Please try again shortly.</div>`;
     }
@@ -358,11 +424,14 @@
     const category = $('#categoryFilter').value;
 
     const filtered = allVehicles.filter(v => {
-      if (currentStatus && v.status !== currentStatus) return false;
+      if (currentStatus === 'forsale') { if (v.listingStatus !== 'For Sale') return false; }
+      else if (currentStatus && v.status !== currentStatus) return false;
       if (category && v.category !== category) return false;
       if (search && !(v.name.toLowerCase().includes(search) || v.brand.toLowerCase().includes(search))) return false;
       return true;
     });
+
+    $('#resultsCount').textContent = filtered.length + (filtered.length === 1 ? ' vehicle' : ' vehicles') + ' found';
 
     if (!filtered.length){
       $('#fleetGrid').innerHTML = '<div class="empty-state">No vehicles match these filters yet.</div>';
@@ -370,11 +439,17 @@
     }
 
     $('#fleetGrid').innerHTML = filtered.map(v => {
-      const img = v.images && v.images[0] ? v.images[0] : '';
-      const bg = img ? `background-image:url('${img}')` : '';
+      const img = v.images && v.images[0] ? v.images[0] : PLACEHOLDER_IMG;
+      const photoCount = v.images ? v.images.length : 0;
       return `
-      <div class="car-card">
-        <div class="car-img" style="${bg}"><span class="status status-${v.status}">${v.status}</span></div>
+      <div class="car-card" data-open="${v._id}">
+        <div class="car-img" style="background-image:url('${img}')">
+          <div class="badges">
+            <span class="pill status-${v.status}">${v.status}</span>
+            ${v.listingStatus === 'For Sale' ? '<span class="pill pill-forsale">For Sale</span>' : '<span></span>'}
+          </div>
+          ${photoCount > 1 ? `<span class="photo-count"><i class="fas fa-images"></i> ${photoCount}</span>` : ''}
+        </div>
         <div class="car-body">
           <h3>${v.name}</h3>
           <div class="meta">${v.brand} · ${v.modelYear} · ${v.category}</div>
@@ -389,7 +464,14 @@
       </div>`;
     }).join('');
 
-    $$('[data-request]').forEach(btn => btn.addEventListener('click', () => openRequestModal(btn.dataset.request)));
+    $$('[data-open]').forEach(card => card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-request]')) return; // let the Request button handle its own click
+      openDetail(card.dataset.open);
+    }));
+    $$('[data-request]').forEach(btn => btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openRequestModal(btn.dataset.request);
+    }));
   }
 
   $('#searchInput').addEventListener('input', renderFleet);
@@ -403,8 +485,74 @@
     });
   });
 
+  // ---------------- PRODUCT DETAIL VIEW ----------------
+  function openDetail(id){
+    const v = allVehicles.find(x => x._id === id);
+    if (!v) return;
+    location.hash = 'vehicle-' + id;
+
+    detailImages = (v.images && v.images.length) ? v.images : [PLACEHOLDER_IMG];
+    $('#detailMainImg').src = detailImages[0];
+    $('#detailThumbs').innerHTML = detailImages.map((img, i) => `<img src="${img}" data-thumb="${i}" class="${i===0?'active':''}">`).join('');
+    $$('[data-thumb]').forEach(t => t.addEventListener('click', () => {
+      $('#detailMainImg').src = detailImages[Number(t.dataset.thumb)];
+      $$('[data-thumb]').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+    }));
+
+    $('#detailBadges').innerHTML = `
+      <span class="pill status-${v.status}">${v.status}</span>
+      ${v.listingStatus === 'For Sale' ? '<span class="pill pill-forsale">For Sale</span>' : ''}
+      <span class="pill" style="background:var(--emerald-tint); color:var(--emerald-deep);">${v.condition || 'Nigerian Used'}</span>
+    `;
+    $('#detailName').textContent = v.name;
+    $('#detailMeta').textContent = `${v.brand} · ${v.modelYear} · ${v.category}`;
+    $('#detailSpecs').innerHTML = [
+      ['Transmission', v.transmission || '—'],
+      ['Fuel type', v.fuelType || '—'],
+      ['Seats', v.seats || '—'],
+      ['Mileage', v.mileage ? v.mileage.toLocaleString() + ' km' : '—']
+    ].map(([label, val]) => `<div class="spec-item"><span class="spec-label">${label}</span>${val}</div>`).join('');
+    $('#detailDesc').textContent = v.description || '';
+
+    const priceItems = [
+      ['Daily rental', fmtMoney(v.dailyRentalRate)],
+      ['Monthly lease', fmtMoney(v.monthlyLeaseRate)]
+    ];
+    if (v.listingStatus === 'For Sale') priceItems.push(['Purchase price', fmtMoney(v.purchasePrice)]);
+    $('#detailPricePanel').innerHTML = priceItems.map(([label, val]) => `<div class="p-item"><strong>${val}</strong><span>${label}</span></div>`).join('');
+
+    const disabled = v.status !== 'available' ? 'disabled' : '';
+    $('#detailCta').innerHTML = `
+      <button class="btn btn-primary" data-cta-type="rental" ${disabled}><i class="fas fa-key"></i> Rent</button>
+      <button class="btn btn-outline-dark" data-cta-type="lease" ${disabled}><i class="fas fa-file-signature"></i> Lease</button>
+      ${v.listingStatus === 'For Sale' ? '<button class="btn btn-gold" data-cta-type="purchase"><i class="fas fa-tag"></i> Buy</button>' : ''}
+    `;
+    $$('[data-cta-type]').forEach(btn => btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      openRequestModal(v._id, btn.dataset.ctaType);
+    }));
+
+    $('#detailOverlay').classList.add('show');
+  }
+
+  function closeDetail(){
+    $('#detailOverlay').classList.remove('show');
+    if (location.hash.startsWith('#vehicle-')) history.replaceState(null, '', location.pathname + location.search);
+  }
+  $('#detailCloseBtn').addEventListener('click', closeDetail);
+  $('#detailOverlay').addEventListener('click', (e) => { if (e.target.id === 'detailOverlay') closeDetail(); });
+
+  function maybeOpenFromHash(){
+    if (location.hash.startsWith('#vehicle-')) {
+      const id = location.hash.replace('#vehicle-', '');
+      if (allVehicles.some(v => v._id === id)) openDetail(id);
+    }
+  }
+  window.addEventListener('hashchange', maybeOpenFromHash);
+
   // ---------------- REQUEST MODAL ----------------
-  function openRequestModal(id){
+  function openRequestModal(id, presetType){
     selectedVehicle = allVehicles.find(v => v._id === id);
     if (!selectedVehicle) return;
     $('#modalVehicleName').textContent = selectedVehicle.name;
@@ -412,9 +560,13 @@
     $('#requestForm').reset();
     $('#requestForm').style.display = 'block';
     $('#requestSuccess').classList.remove('show');
-    selectedType = 'rental';
-    $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === 'rental'));
-    $('#dateFields').style.display = 'grid';
+
+    const canBuy = selectedVehicle.listingStatus === 'For Sale';
+    $$('.type-btn').forEach(b => { b.style.display = (b.dataset.type === 'purchase' && !canBuy) ? 'none' : 'flex'; });
+
+    selectedType = presetType || 'rental';
+    $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === selectedType));
+    $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
     $('#requestModal').classList.add('show');
   }
   $('#closeModalBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
