@@ -45,7 +45,11 @@
   .btn-outline:hover{ border-color:var(--emerald); color:var(--emerald); }
   .btn-block{ width:100%; }
   .btn-sm{ padding:8px 14px; font-size:12.5px; }
-  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+  /* Loading Spinner */
+  .spinner{ display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:#fff; animation:spin 0.6s linear infinite; vertical-align:middle; }
+  @keyframes spin{ to { transform:rotate(360deg); } }
 
   /* ---------- Top utility bar ---------- */
   .topbar{ background:var(--emerald-deep); color:rgba(255,255,255,0.85); font-size:11.5px; padding:6px 0; }
@@ -172,6 +176,7 @@
   .form-success.show{ display:block; }
   .form-success.show ~ form{ display:none; }
   .form-success .check{ width:48px; height:48px; border-radius:50%; background:var(--grad-emerald); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
+  .form-success .check svg{ width:24px; height:24px; stroke:#fff; stroke-width:2.5; }
 
   /* ---------- How it works ---------- */
   .how-section{ padding:44px 0 50px; }
@@ -204,7 +209,7 @@
     .mobile-search-toggle, .mobile-menu-toggle{ display:flex; align-items:center; justify-content:center; }
     .header-actions .header-link:not(.always-mobile){ display:none; }
     .header-main{ padding:12px 0; gap:10px; }
-    /* Logo left, hamburger right – order handled by flex order */
+    /* Logo left, hamburger right */
     .header-main .logo-bare{ order:1; }
     .header-main .search-bar{ order:2; }
     .header-main .header-actions{ order:3; margin-left:auto; }
@@ -404,7 +409,7 @@
         <div class="field"><label>End date</label><input type="date" id="cEnd"></div>
       </div>
       <div class="field"><label>Anything else?</label><textarea id="cNotes" rows="2" placeholder="Pickup city, questions..."></textarea></div>
-      <button type="submit" class="btn btn-primary btn-block">Send request</button>
+      <button type="submit" class="btn btn-primary btn-block" id="submitRequestBtn">Send request</button>
     </form>
     <div class="form-success" id="requestSuccess">
       <div class="check"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
@@ -467,6 +472,7 @@
   let selectedVehicle = null;
   let selectedType = 'rental';
   let detailImages = [];
+  let isSubmitting = false;
 
   // ---------------- Mobile nav / search ----------------
   const mobileMenuToggle = $('#mobileMenuToggle');
@@ -480,7 +486,6 @@
     mobileSearchWrap.classList.toggle('show');
     if (mobileSearchWrap.classList.contains('show')) {
       $('#searchInputMobile').focus();
-      // scroll the search into view on mobile so it's not hidden
       setTimeout(() => {
         mobileSearchWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 200);
@@ -642,27 +647,66 @@
   window.addEventListener('hashchange', maybeOpenFromHash);
 
   // ---------------- REQUEST MODAL ----------------
+  const submitBtn = document.getElementById('submitRequestBtn');
+  const originalBtnText = submitBtn.innerHTML;
+
+  function resetModalState() {
+    $('#requestSuccess').classList.remove('show');
+    $('#requestForm').style.display = 'block';
+    $('#requestForm').reset();
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnText;
+    isSubmitting = false;
+    // Reset date fields visibility based on default type (rental)
+    $('#dateFields').style.display = 'grid';
+    $$('.type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.type-btn[data-type="rental"]').classList.add('active');
+    selectedType = 'rental';
+  }
+
+  function closeRequestModal() {
+    $('#requestModal').classList.remove('show');
+    resetModalState();
+    selectedVehicle = null;
+  }
+
+  // Close modal when clicking the background overlay
+  $('#requestModal').addEventListener('click', function(e) {
+    if (e.target === this && !isSubmitting) {
+      closeRequestModal();
+    }
+  });
+
+  // Close button inside modal
+  $('#closeModalBtn').addEventListener('click', closeRequestModal);
+
+  // Success close button
+  $('#successCloseBtn').addEventListener('click', closeRequestModal);
+
   function openRequestModal(id, presetType){
+    if (isSubmitting) return;
     selectedVehicle = allVehicles.find(v => v._id === id);
     if (!selectedVehicle) return;
+    
+    // Reset modal to form state
+    resetModalState();
+    
     $('#modalVehicleName').textContent = selectedVehicle.name;
     $('#modalVehicleMeta').textContent = `${selectedVehicle.brand} · ${selectedVehicle.modelYear} · ${fmtMoney(selectedVehicle.dailyRentalRate)}/day · ${fmtMoney(selectedVehicle.monthlyLeaseRate)}/month`;
-    $('#requestForm').reset();
-    $('#requestForm').style.display = 'block';
-    $('#requestSuccess').classList.remove('show');
 
     const canBuy = selectedVehicle.listingStatus === 'For Sale';
-    $$('.type-btn').forEach(b => { b.style.display = (b.dataset.type === 'purchase' && !canBuy) ? 'none' : 'flex'; });
+    $$('.type-btn').forEach(b => { 
+      b.style.display = (b.dataset.type === 'purchase' && !canBuy) ? 'none' : 'flex'; 
+    });
 
     selectedType = presetType || 'rental';
     $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === selectedType));
     $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
     $('#requestModal').classList.add('show');
   }
-  $('#closeModalBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
-  $('#successCloseBtn').addEventListener('click', () => $('#requestModal').classList.remove('show'));
 
   $$('.type-btn').forEach(btn => btn.addEventListener('click', () => {
+    if (isSubmitting) return;
     $$('.type-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     selectedType = btn.dataset.type;
@@ -671,7 +715,13 @@
 
   $('#requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!selectedVehicle) return;
+    if (isSubmitting || !selectedVehicle) return;
+
+    // Start loading state
+    isSubmitting = true;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+
     const payload = {
       vehicle: selectedVehicle._id,
       type: selectedType,
@@ -682,16 +732,25 @@
       endDate: $('#cEnd').value || undefined,
       notes: $('#cNotes').value
     };
+
     try {
       const res = await fetch(API_BASE + '/leases', {
         method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not send request');
+      
+      // Success: show success state
       $('#requestForm').style.display = 'none';
       $('#requestSuccess').classList.add('show');
+      
     } catch (err) {
       alert('Error: ' + err.message);
+    } finally {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      isSubmitting = false;
     }
   });
 
