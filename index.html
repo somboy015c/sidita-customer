@@ -74,7 +74,7 @@
   .cat-chip{ flex-shrink:0; padding:7px 15px; border-radius:20px; border:1.5px solid var(--border); background:#fff; font-size:12.5px; font-weight:700; color:var(--ink-soft); white-space:nowrap; }
   .cat-chip.active{ background:var(--grad-emerald); color:#fff; border-color:transparent; }
 
-  .mobile-panel{ display:none; background:#fff; border-bottom:1px solid var(--border); padding:14px 20px; }
+  .mobile-panel{ display:none; background:#fff; border-bottom:1px solid var(--border); padding:22px 20px 26px; }
   .mobile-panel.show{ display:flex; flex-direction:column; gap:12px; }
   .mobile-panel a{ font-size:14.5px; font-weight:600; padding:6px 0; }
   .mobile-search-wrap{ display:none; padding:10px 16px 14px; background:#fff; border-bottom:1px solid var(--border); }
@@ -203,7 +203,12 @@
     .search-bar{ display:none; }
     .mobile-search-toggle, .mobile-menu-toggle{ display:flex; align-items:center; justify-content:center; }
     .header-actions .header-link:not(.always-mobile){ display:none; }
-    .header-main{ padding:10px 0; gap:10px; }
+    .header-main{ padding:12px 0; gap:10px; }
+    /* Logo left, hamburger right – order handled by flex order */
+    .header-main .logo-bare{ order:1; }
+    .header-main .search-bar{ order:2; }
+    .header-main .header-actions{ order:3; margin-left:auto; }
+    .header-main .mobile-menu-toggle{ order:4; }
     .fleet-grid{ grid-template-columns:1fr 1fr; gap:10px; }
     .car-body{ padding:9px 10px 11px; }
     .car-body h3{ font-size:12.5px; }
@@ -213,7 +218,12 @@
     .hero-stats{ gap:16px; }
     .detail-info{ padding:6px 18px 22px; }
     .detail-gallery{ padding:18px 18px 0; }
-    .footer-grid{ grid-template-columns:1fr; gap:20px; }
+    /* How it works: 1 card per row */
+    .how-grid{ grid-template-columns:1fr; gap:14px; }
+    /* Footer: hide Explore & Vehicle types */
+    .footer-grid{ grid-template-columns:1fr 1fr; gap:20px; }
+    .footer-grid>div:nth-child(2),
+    .footer-grid>div:nth-child(3){ display:none !important; }
     .toolbar{ flex-direction:column; align-items:flex-start; }
     .wrap{ padding:0 14px; }
   }
@@ -230,7 +240,6 @@
 
 <header>
   <div class="wrap header-main">
-    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
     <div class="logo-bare">
       <img src="logo.png" alt="SIDITA" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
       <div class="logo-fallback">S</div>
@@ -244,6 +253,7 @@
       <a href="#how" class="header-link"><i class="fas fa-circle-question"></i>How it works</a>
       <button class="mobile-search-toggle" id="mobileSearchToggle"><i class="fas fa-search"></i></button>
     </div>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
   </div>
   <div class="mobile-search-wrap" id="mobileSearchWrap">
     <div class="search-bar" style="display:block; max-width:none;">
@@ -468,7 +478,13 @@
   const mobileSearchWrap = $('#mobileSearchWrap');
   mobileSearchToggle.addEventListener('click', () => {
     mobileSearchWrap.classList.toggle('show');
-    if (mobileSearchWrap.classList.contains('show')) $('#searchInputMobile').focus();
+    if (mobileSearchWrap.classList.contains('show')) {
+      $('#searchInputMobile').focus();
+      // scroll the search into view on mobile so it's not hidden
+      setTimeout(() => {
+        mobileSearchWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
   });
 
   function syncSearch(value){
