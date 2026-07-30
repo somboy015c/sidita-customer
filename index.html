@@ -298,14 +298,47 @@
             font-weight: 600;
             padding: 6px 0;
         }
-        .mobile-search-wrap {
+
+        /* Mobile search overlay – positioned outside header flow */
+        .mobile-search-overlay {
             display: none;
-            padding: 10px 16px 14px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
             background: #fff;
+            padding: 12px 16px 16px;
             border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
-        .mobile-search-wrap.show {
+        .mobile-search-overlay.show {
             display: block;
+        }
+        .mobile-search-overlay .search-bar {
+            display: block !important;
+            max-width: none !important;
+        }
+        .mobile-search-overlay .search-bar input {
+            font-size: 16px;
+            padding: 12px 48px 12px 16px;
+        }
+        .mobile-search-overlay .search-bar button {
+            top: 6px;
+            bottom: 6px;
+            right: 6px;
+            width: 38px;
+        }
+        .mobile-search-overlay .close-search {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--ink-soft);
+            padding: 6px;
         }
 
         /* ---------- Hero banner ---------- */
@@ -953,7 +986,7 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 16px 0;   /* increased top/bottom padding */
+                padding: 16px 0 18px;
                 flex-wrap: nowrap;
             }
             .logo-bare {
@@ -980,6 +1013,11 @@
             .mobile-menu-toggle {
                 order: 3;
                 display: flex !important;
+            }
+
+            /* Hide the old inline mobile search */
+            .mobile-search-wrap {
+                display: none !important;
             }
 
             .fleet-grid {
@@ -1110,14 +1148,6 @@
             <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
         </div>
 
-        <!-- Mobile search (slides down) -->
-        <div class="mobile-search-wrap" id="mobileSearchWrap">
-            <div class="search-bar" style="display:block; max-width:none;">
-                <input type="text" id="searchInputMobile" placeholder="Search vehicles by name or brand…">
-                <button type="button" id="searchBtnMobile"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-
         <!-- Mobile nav panel -->
         <div class="mobile-panel" id="mobilePanel">
             <a href="#fleet">Fleet</a>
@@ -1132,6 +1162,15 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Search Overlay – fixed position, appears below header -->
+    <div class="mobile-search-overlay" id="mobileSearchOverlay">
+        <div class="search-bar" style="display:block !important; max-width:none !important;">
+            <input type="text" id="searchInputMobile" placeholder="Search vehicles by name or brand…" autofocus>
+            <button type="button" id="searchBtnMobile"><i class="fas fa-search"></i></button>
+            <button type="button" class="close-search" id="closeMobileSearch"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
 
     <section class="hero">
         <div class="hero-inner">
@@ -1340,32 +1379,59 @@
             mobileMenuToggle.addEventListener('click', () => mobilePanel.classList.toggle('show'));
             $$('.mobile-panel a').forEach(a => a.addEventListener('click', () => mobilePanel.classList.remove('show')));
 
+            // Mobile search overlay
+            const mobileSearchOverlay = $('#mobileSearchOverlay');
             const mobileSearchToggle = $('#mobileSearchToggle');
-            const mobileSearchWrap = $('#mobileSearchWrap');
+            const closeMobileSearch = $('#closeMobileSearch');
             const mobileSearchInput = $('#searchInputMobile');
 
-            mobileSearchToggle.addEventListener('click', () => {
-                mobileSearchWrap.classList.toggle('show');
-                if (mobileSearchWrap.classList.contains('show')) {
-                    // focus the input after a tiny delay so the keyboard appears
-                    setTimeout(() => mobileSearchInput.focus(), 100);
+            function openMobileSearch() {
+                mobileSearchOverlay.classList.add('show');
+                // Focus the input after a tiny delay so the keyboard appears
+                setTimeout(() => {
+                    mobileSearchInput.focus();
+                    // Scroll the overlay into view on mobile
+                    mobileSearchOverlay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+
+            function closeMobileSearchFn() {
+                mobileSearchOverlay.classList.remove('show');
+                mobileSearchInput.blur();
+            }
+
+            mobileSearchToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (mobileSearchOverlay.classList.contains('show')) {
+                    closeMobileSearchFn();
+                } else {
+                    openMobileSearch();
                 }
             });
 
-            // When the mobile search input gets focus, ensure the wrap stays open and scroll into view
-            mobileSearchInput.addEventListener('focus', function() {
-                mobileSearchWrap.classList.add('show');
-                // On mobile, the keyboard may hide the input, so scroll it into view
-                setTimeout(() => {
-                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
+            closeMobileSearch.addEventListener('click', closeMobileSearchFn);
+
+            // Close search when tapping outside the search bar (on the overlay background)
+            mobileSearchOverlay.addEventListener('click', (e) => {
+                if (e.target === mobileSearchOverlay) {
+                    closeMobileSearchFn();
+                }
             });
 
+            // Close search with escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileSearchOverlay.classList.contains('show')) {
+                    closeMobileSearchFn();
+                }
+            });
+
+            // Sync search between desktop and mobile inputs
             function syncSearch(value) {
                 $('#searchInput').value = value;
                 $('#searchInputMobile').value = value;
                 renderFleet();
             }
+
             $('#searchInput').addEventListener('input', (e) => syncSearch(e.target.value));
             $('#searchInputMobile').addEventListener('input', (e) => syncSearch(e.target.value));
             $('#searchBtnDesktop').addEventListener('click', renderFleet);
