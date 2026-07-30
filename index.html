@@ -953,19 +953,16 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 0;
+                padding: 16px 0;   /* increased top/bottom padding */
                 flex-wrap: nowrap;
             }
-            /* logo stays on the left */
             .logo-bare {
                 order: 1;
                 flex: 0 0 auto;
             }
-            /* search bar hidden on mobile */
             .search-bar {
                 display: none !important;
             }
-            /* header-actions (contains search icon) moves to the right */
             .header-actions {
                 order: 2;
                 margin-left: auto;
@@ -974,15 +971,12 @@
                 gap: 4px;
                 flex-shrink: 0;
             }
-            /* hide the Fleet & How it works links on mobile */
             .header-actions .header-link:not(.always-mobile) {
                 display: none !important;
             }
-            /* show the search toggle inside header-actions */
             .mobile-search-toggle {
                 display: flex !important;
             }
-            /* hamburger on the far right */
             .mobile-menu-toggle {
                 order: 3;
                 display: flex !important;
@@ -1348,9 +1342,23 @@
 
             const mobileSearchToggle = $('#mobileSearchToggle');
             const mobileSearchWrap = $('#mobileSearchWrap');
+            const mobileSearchInput = $('#searchInputMobile');
+
             mobileSearchToggle.addEventListener('click', () => {
                 mobileSearchWrap.classList.toggle('show');
-                if (mobileSearchWrap.classList.contains('show')) $('#searchInputMobile').focus();
+                if (mobileSearchWrap.classList.contains('show')) {
+                    // focus the input after a tiny delay so the keyboard appears
+                    setTimeout(() => mobileSearchInput.focus(), 100);
+                }
+            });
+
+            // When the mobile search input gets focus, ensure the wrap stays open and scroll into view
+            mobileSearchInput.addEventListener('focus', function() {
+                mobileSearchWrap.classList.add('show');
+                // On mobile, the keyboard may hide the input, so scroll it into view
+                setTimeout(() => {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             });
 
             function syncSearch(value) {
