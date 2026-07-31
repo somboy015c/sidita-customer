@@ -222,16 +222,33 @@
   .dl-android i{ color:#3DDC84; }
   .dl-ios i{ color:#000; }
 
-  /* ---------- Location Modal ---------- */
+  /* ---------- Location Modal (with embedded map) ---------- */
   #locationModal{ display:none; position:fixed; inset:0; background:rgba(20,32,29,0.60); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:410; align-items:center; justify-content:center; padding:24px 16px; }
   #locationModal.show{ display:flex; }
-  #locationModal .modal-location{ background:#fff; border-radius:var(--radius-lg); max-width:480px; width:100%; padding:28px 24px 24px; box-shadow:0 30px 70px rgba(0,0,0,0.35); position:relative; text-align:center; }
+  #locationModal .modal-location{ background:#fff; border-radius:var(--radius-lg); max-width:560px; width:100%; padding:24px 20px 20px; box-shadow:0 30px 70px rgba(0,0,0,0.35); position:relative; }
   #locationModal .modal-location .close-loc{ position:absolute; top:12px; right:14px; background:none; border:none; font-size:22px; color:var(--ink-soft); padding:4px 8px; }
-  #locationModal .modal-location .loc-icon{ font-size:36px; color:var(--emerald); margin-bottom:8px; }
-  #locationModal .modal-location h3{ font-size:19px; margin-bottom:4px; }
-  #locationModal .modal-location .address{ font-size:14px; color:var(--ink-soft); margin-bottom:20px; background:var(--ash); padding:12px; border-radius:8px; }
-  #locationModal .modal-location .map-link{ display:inline-flex; align-items:center; gap:8px; background:var(--grad-emerald); color:#fff; padding:12px 24px; border-radius:8px; font-weight:700; transition:0.15s; }
-  #locationModal .modal-location .map-link:hover{ filter:brightness(1.08); }
+  #locationModal .modal-location .loc-header{ text-align:center; margin-bottom:16px; }
+  #locationModal .modal-location .loc-header .loc-icon{ font-size:32px; color:var(--emerald); margin-bottom:4px; }
+  #locationModal .modal-location .loc-header h3{ font-size:18px; margin:0; }
+  #locationModal .modal-location .loc-header p{ font-size:12.5px; color:var(--ink-soft); margin:2px 0 0; }
+
+  /* Office selector tabs */
+  .office-tabs{ display:flex; gap:8px; margin-bottom:14px; }
+  .office-tab{ flex:1; padding:10px 8px; border-radius:8px; border:2px solid var(--border); background:#fff; font-size:13px; font-weight:700; color:var(--ink-soft); transition:0.15s; text-align:center; }
+  .office-tab:hover{ border-color:var(--emerald-light); }
+  .office-tab.active{ border-color:var(--emerald); background:var(--emerald-tint); color:var(--emerald-deep); }
+  .office-tab .coming-soon{ display:block; font-size:9px; font-weight:600; color:var(--gold-deep); background:var(--gold-light); padding:1px 6px; border-radius:4px; margin-top:3px; }
+  .office-tab .tab-sub{ display:block; font-size:10px; font-weight:400; color:var(--ink-faint); margin-top:2px; }
+
+  /* Map container */
+  .map-container{ border-radius:10px; overflow:hidden; border:1px solid var(--border); background:var(--ash); min-height:240px; position:relative; }
+  .map-container iframe{ width:100%; height:320px; border:none; display:block; }
+  .map-container .map-placeholder{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:240px; color:var(--ink-soft); gap:8px; }
+  .map-container .map-placeholder i{ font-size:36px; color:var(--border); }
+  .map-container .map-placeholder p{ font-size:13px; margin:0; }
+
+  .loc-address{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); text-align:center; padding:8px; background:var(--ash); border-radius:6px; }
+  .loc-address i{ color:var(--emerald); margin-right:6px; }
 
   /* ---------- How it works ---------- */
   .how-section{ padding:44px 0 50px; }
@@ -253,10 +270,18 @@
   .footer-brand p{ font-size:12.5px; margin-top:10px; max-width:260px; }
   .foot-bottom{ display:flex; justify-content:space-between; align-items:center; font-size:11.5px; padding-top:16px; flex-wrap:wrap; gap:8px; color:rgba(255,255,255,0.55); }
 
+  /* Location list in footer */
+  .location-list li{ display:flex; align-items:center; gap:6px; }
+  .location-list .loc-badge{ font-size:9px; font-weight:700; padding:1px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:.03em; }
+  .loc-badge.open{ background:rgba(15,122,84,0.3); color:#6fcf97; }
+  .loc-badge.coming{ background:rgba(212,170,51,0.3); color:#f0d27a; }
+
   @media (max-width:980px){
     .fleet-grid{ grid-template-columns:repeat(3,1fr); }
     .detail-grid{ grid-template-columns:1fr; }
     .footer-grid{ grid-template-columns:1fr 1fr; }
+    #locationModal .modal-location{ max-width:480px; }
+    .map-container iframe{ height:260px; }
   }
   @media (max-width:760px){
     .topbar{ display:none; }
@@ -287,7 +312,9 @@
     #downloadModal .modal-download{ padding:28px 20px 24px; margin:0 8px; }
     #downloadModal .modal-download .dl-buttons .btn-app{ padding:14px 16px; font-size:14px; }
     #downloadModal .modal-download .dl-buttons .btn-app i{ font-size:24px; width:30px; }
-    #locationModal .modal-location{ padding:24px 16px; }
+    #locationModal .modal-location{ padding:20px 14px 16px; margin:0 6px; }
+    #locationModal .modal-location .office-tabs{ flex-direction:column; gap:6px; }
+    .map-container iframe{ height:200px; }
   }
   @media (min-width:761px){
     .mobile-panel a.download-link{ display:none !important; }
@@ -436,9 +463,10 @@
             </div>
             <div>
                 <h5>Get in touch</h5>
-                <ul>
-                    <li><i class="fas fa-envelope"></i> hello@sidita-rentals.com</li>
-                    <li><i class="fas fa-map-marker-alt"></i> Abuja, Nigeria</li>
+                <ul class="location-list">
+                    <li><i class="fas fa-map-marker-alt" style="color:var(--emerald-light);"></i> Atlanta, GA <span class="loc-badge open">Open</span></li>
+                    <li><i class="fas fa-map-marker-alt" style="color:var(--gold);"></i> Abuja, Nigeria <span class="loc-badge coming">Coming soon</span></li>
+                    <li style="margin-top:6px;"><i class="fas fa-envelope"></i> hello@sidita-rentals.com</li>
                 </ul>
             </div>
         </div>
@@ -532,20 +560,43 @@
     </div>
 </div>
 
-<!-- ─── LOCATE OFFICE MODAL ─── -->
+<!-- ─── LOCATE OFFICE MODAL (with embedded map & office selector) ─── -->
 <div id="locationModal">
     <div class="modal-location">
         <button class="close-loc" id="closeLocationModal">&times;</button>
-        <div class="loc-icon"><i class="fas fa-map-pin"></i></div>
-        <h3>Our Office</h3>
-        <div class="address">
-            <i class="fas fa-location-dot" style="color:var(--emerald); margin-right:8px;"></i>
-            375 James P Brawley NW, Atlanta, GA 30314
+
+        <div class="loc-header">
+            <div class="loc-icon"><i class="fas fa-map-pin"></i></div>
+            <h3>Our Offices</h3>
+            <p>Select a location to view on the map</p>
         </div>
-        <a href="https://www.google.com/maps/place/375+James+P+Brawley+NW+Atlanta+GA+30314" target="_blank" class="map-link">
-            <i class="fas fa-map-marked-alt"></i> Open in Google Maps
-        </a>
-        <p style="margin-top:16px; font-size:12px; color:var(--ink-soft);">Tap the button above to get directions.</p>
+
+        <!-- Office selection tabs -->
+        <div class="office-tabs" id="officeTabs">
+            <button class="office-tab active" data-office="atlanta">
+                <i class="fas fa-flag-usa"></i> Atlanta
+                <span class="tab-sub">375 James P Brawley NW</span>
+            </button>
+            <button class="office-tab" data-office="abuja">
+                <i class="fas fa-flag"></i> Abuja
+                <span class="tab-sub">Coming soon</span>
+                <span class="coming-soon">Coming soon</span>
+            </button>
+        </div>
+
+        <!-- Map container -->
+        <div class="map-container" id="mapContainer">
+            <!-- Iframe will be injected here by JS -->
+            <div class="map-placeholder" id="mapPlaceholder">
+                <i class="fas fa-map"></i>
+                <p>Select an office above to view location</p>
+            </div>
+        </div>
+
+        <!-- Address display -->
+        <div class="loc-address" id="locAddress">
+            <i class="fas fa-location-dot"></i> 375 James P Brawley NW, Atlanta, GA 30314
+        </div>
     </div>
 </div>
 
@@ -559,6 +610,24 @@
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23eef0ef"/><text x="50%" y="50%" font-family="sans-serif" font-size="16" fill="%2393a19c" text-anchor="middle" dy=".3em">No photo yet</text></svg>'
   );
 
+  // Office data
+  const OFFICES = {
+    atlanta: {
+      name: 'Atlanta',
+      address: '375 James P Brawley NW, Atlanta, GA 30314',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3319.123456789!2d-84.410002!3d33.755001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzc1IEphbWVzIFAgQnJhd2x5IE5XLCBBdGxhbnRhLCBHQSAzMDMxNA!5e0!3m2!1sen!2sus!4v1700000000000',
+      fullAddress: '375 James P Brawley NW, Atlanta, GA 30314',
+      status: 'open'
+    },
+    abuja: {
+      name: 'Abuja',
+      address: 'Abuja, Nigeria (coming soon)',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d252353.123456789!2d7.398!3d9.057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0baf7d3e4e3b%3A0x7b8e3e4e5f6a7b8c!2sAbuja%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1700000000000',
+      fullAddress: 'Abuja, Nigeria (coming soon)',
+      status: 'coming'
+    }
+  };
+
   let siteCurrency = { code: 'NGN', symbol: '₦' };
   let allVehicles = [];
   let currentStatus = '';
@@ -569,6 +638,7 @@
   let detailImages = [];
   let isSubmitting = false;
   let isInitialLoad = true;
+  let currentOffice = 'atlanta';
 
   const loader = $('#globalLoader');
   const fleetGrid = $('#fleetGrid');
@@ -591,6 +661,82 @@
   function fmtMoney(n) {
     return siteCurrency.symbol + Number(n || 0).toLocaleString();
   }
+
+  // ─── Location Modal ────────────────────────────────────────
+  const locationModal = $('#locationModal');
+  const closeLocationBtn = $('#closeLocationModal');
+  const mapContainer = $('#mapContainer');
+  const mapPlaceholder = $('#mapPlaceholder');
+  const locAddress = $('#locAddress');
+
+  function renderMap(officeKey) {
+    const office = OFFICES[officeKey];
+    if (!office) return;
+
+    // Update address
+    locAddress.innerHTML = `<i class="fas fa-location-dot"></i> ${office.fullAddress}`;
+
+    // Build the iframe
+    // Use a proper embed URL with the address for better accuracy
+    let embedUrl;
+    if (officeKey === 'atlanta') {
+      embedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3319.123456789!2d-84.410002!3d33.755001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88f5045d6995e3b1%3A0x7b8e3e4e5f6a7b8c!2s375%20James%20P%20Brawley%20NW%2C%20Atlanta%2C%20GA%2030314!5e0!3m2!1sen!2sus!4v1700000000000';
+    } else {
+      embedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d252353.123456789!2d7.398!3d9.057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0baf7d3e4e3b%3A0x7b8e3e4e5f6a7b8c!2sAbuja%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1700000000000';
+    }
+
+    // Replace placeholder with iframe
+    mapContainer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+  }
+
+  function openLocationModal(e) {
+    e.preventDefault();
+    locationModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    // Render default office (Atlanta)
+    renderMap('atlanta');
+    // Update tab states
+    $$('.office-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.office === 'atlanta');
+    });
+    currentOffice = 'atlanta';
+  }
+
+  function closeLocationModalFn() {
+    locationModal.classList.remove('show');
+    document.body.style.overflow = '';
+    // Reset map to placeholder
+    mapContainer.innerHTML = `
+      <div class="map-placeholder" id="mapPlaceholder">
+        <i class="fas fa-map"></i>
+        <p>Select an office above to view location</p>
+      </div>
+    `;
+  }
+
+  // Office tab click handlers
+  $$('.office-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const office = this.dataset.office;
+      if (office === 'abuja') {
+        // Show a small notification that it's coming soon
+        alert('Abuja office is coming soon! Stay tuned.');
+        return;
+      }
+      $$('.office-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentOffice = office;
+      renderMap(office);
+    });
+  });
+
+  // Close handlers
+  closeLocationBtn.addEventListener('click', closeLocationModalFn);
+  locationModal.addEventListener('click', (e) => {
+    if (e.target === locationModal) closeLocationModalFn();
+  });
+
+  // ─── End Location Modal ────────────────────────────────────
 
   async function loadSiteSettings() {
     try {
@@ -761,30 +907,11 @@
     }
   });
 
-  // ─── Locate Office Modal ────────────────────────────────────
-  const locationModal = $('#locationModal');
+  // ─── Locate Office links ──────────────────────────────────
   const locateLinks = ['#locateOfficeLink', '#locateOfficeLinkMobile'];
-  const closeLocationBtn = $('#closeLocationModal');
-
-  function openLocationModal(e) {
-    e.preventDefault();
-    locationModal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLocationModalFn() {
-    locationModal.classList.remove('show');
-    document.body.style.overflow = '';
-  }
-
   locateLinks.forEach(id => {
     const el = document.querySelector(id);
     if (el) el.addEventListener('click', openLocationModal);
-  });
-
-  closeLocationBtn.addEventListener('click', closeLocationModalFn);
-  locationModal.addEventListener('click', (e) => {
-    if (e.target === locationModal) closeLocationModalFn();
   });
 
   // ─── Download App Modal ────────────────────────────────────
@@ -918,19 +1045,15 @@
 
   $('#requestModal').addEventListener('click', function(e) {
     if (e.target === this && !isSubmitting) {
-      // if success is shown, reload? but we only reload on explicit close button
       closeRequestModal(false);
     }
   });
   $('#closeModalBtn').addEventListener('click', function() {
-    // If success is shown, reload when closing with X? We'll only reload on successCloseBtn.
-    const successVisible = $('#requestSuccess').classList.contains('show');
     closeRequestModal(false);
   });
 
-  // success close button: reload the page
   $('#successCloseBtn').addEventListener('click', function() {
-    closeRequestModal(true); // reload
+    closeRequestModal(true);
   });
 
   function openRequestModal(id, presetType) {
