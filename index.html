@@ -222,6 +222,17 @@
   .dl-android i{ color:#3DDC84; }
   .dl-ios i{ color:#000; }
 
+  /* ---------- Location Modal ---------- */
+  #locationModal{ display:none; position:fixed; inset:0; background:rgba(20,32,29,0.60); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:410; align-items:center; justify-content:center; padding:24px 16px; }
+  #locationModal.show{ display:flex; }
+  #locationModal .modal-location{ background:#fff; border-radius:var(--radius-lg); max-width:480px; width:100%; padding:28px 24px 24px; box-shadow:0 30px 70px rgba(0,0,0,0.35); position:relative; text-align:center; }
+  #locationModal .modal-location .close-loc{ position:absolute; top:12px; right:14px; background:none; border:none; font-size:22px; color:var(--ink-soft); padding:4px 8px; }
+  #locationModal .modal-location .loc-icon{ font-size:36px; color:var(--emerald); margin-bottom:8px; }
+  #locationModal .modal-location h3{ font-size:19px; margin-bottom:4px; }
+  #locationModal .modal-location .address{ font-size:14px; color:var(--ink-soft); margin-bottom:20px; background:var(--ash); padding:12px; border-radius:8px; }
+  #locationModal .modal-location .map-link{ display:inline-flex; align-items:center; gap:8px; background:var(--grad-emerald); color:#fff; padding:12px 24px; border-radius:8px; font-weight:700; transition:0.15s; }
+  #locationModal .modal-location .map-link:hover{ filter:brightness(1.08); }
+
   /* ---------- How it works ---------- */
   .how-section{ padding:44px 0 50px; }
   .section-head{ text-align:center; max-width:560px; margin:0 auto 28px; }
@@ -276,6 +287,7 @@
     #downloadModal .modal-download{ padding:28px 20px 24px; margin:0 8px; }
     #downloadModal .modal-download .dl-buttons .btn-app{ padding:14px 16px; font-size:14px; }
     #downloadModal .modal-download .dl-buttons .btn-app i{ font-size:24px; width:30px; }
+    #locationModal .modal-location{ padding:24px 16px; }
   }
   @media (min-width:761px){
     .mobile-panel a.download-link{ display:none !important; }
@@ -316,6 +328,8 @@
         <div class="header-actions">
             <a href="#fleet" class="header-link"><i class="fas fa-car"></i>Fleet</a>
             <a href="#how" class="header-link"><i class="fas fa-circle-question"></i>How it works</a>
+            <!-- Locate Office link (visible on all devices) -->
+            <a href="#" class="header-link always-mobile" id="locateOfficeLink"><i class="fas fa-map-marker-alt"></i>Locate Office</a>
             <button class="mobile-search-toggle" id="mobileSearchToggle"><i class="fas fa-search"></i></button>
         </div>
         <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
@@ -332,6 +346,7 @@
     <div class="mobile-panel" id="mobilePanel">
         <a href="#fleet"><i class="fas fa-car"></i> Fleet</a>
         <a href="#how"><i class="fas fa-circle-question"></i> How it works</a>
+        <a href="#" id="locateOfficeLinkMobile"><i class="fas fa-map-marker-alt"></i> Locate Office</a>
         <a href="#" class="download-link" id="downloadAppLink"><i class="fas fa-mobile-alt"></i> Download App</a>
         <div class="divider"></div>
         <a href="https://sidita-rentals.com"><i class="fas fa-globe"></i> Main site</a>
@@ -514,6 +529,23 @@
                 </span>
             </button>
         </div>
+    </div>
+</div>
+
+<!-- ─── LOCATE OFFICE MODAL ─── -->
+<div id="locationModal">
+    <div class="modal-location">
+        <button class="close-loc" id="closeLocationModal">&times;</button>
+        <div class="loc-icon"><i class="fas fa-map-pin"></i></div>
+        <h3>Our Office</h3>
+        <div class="address">
+            <i class="fas fa-location-dot" style="color:var(--emerald); margin-right:8px;"></i>
+            375 James P Brawley NW, Atlanta, GA 30314
+        </div>
+        <a href="https://www.google.com/maps/place/375+James+P+Brawley+NW+Atlanta+GA+30314" target="_blank" class="map-link">
+            <i class="fas fa-map-marked-alt"></i> Open in Google Maps
+        </a>
+        <p style="margin-top:16px; font-size:12px; color:var(--ink-soft);">Tap the button above to get directions.</p>
     </div>
 </div>
 
@@ -729,7 +761,33 @@
     }
   });
 
-  // Download App
+  // ─── Locate Office Modal ────────────────────────────────────
+  const locationModal = $('#locationModal');
+  const locateLinks = ['#locateOfficeLink', '#locateOfficeLinkMobile'];
+  const closeLocationBtn = $('#closeLocationModal');
+
+  function openLocationModal(e) {
+    e.preventDefault();
+    locationModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLocationModalFn() {
+    locationModal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  locateLinks.forEach(id => {
+    const el = document.querySelector(id);
+    if (el) el.addEventListener('click', openLocationModal);
+  });
+
+  closeLocationBtn.addEventListener('click', closeLocationModalFn);
+  locationModal.addEventListener('click', (e) => {
+    if (e.target === locationModal) closeLocationModalFn();
+  });
+
+  // ─── Download App Modal ────────────────────────────────────
   const downloadModal = $('#downloadModal');
   const downloadAppLink = $('#downloadAppLink');
   const closeDownloadModal = $('#closeDownloadModal');
@@ -760,7 +818,7 @@
     closeDownloadModalFn();
   });
 
-  // Detail overlay
+  // ─── Detail overlay ──────────────────────────────────────
   function openDetail(id) {
     const v = allVehicles.find(x => x._id === id);
     if (!v) return;
@@ -831,7 +889,7 @@
   }
   window.addEventListener('hashchange', maybeOpenFromHash);
 
-  // Request modal
+  // ─── Request modal ────────────────────────────────────────
   const submitBtn = $('#submitRequestBtn');
   const originalBtnText = submitBtn.innerHTML;
 
@@ -849,17 +907,31 @@
     selectedType = 'rental';
   }
 
-  function closeRequestModal() {
+  function closeRequestModal(shouldReload) {
     $('#requestModal').classList.remove('show');
     resetModalState();
     selectedVehicle = null;
+    if (shouldReload) {
+      location.reload();
+    }
   }
 
   $('#requestModal').addEventListener('click', function(e) {
-    if (e.target === this && !isSubmitting) closeRequestModal();
+    if (e.target === this && !isSubmitting) {
+      // if success is shown, reload? but we only reload on explicit close button
+      closeRequestModal(false);
+    }
   });
-  $('#closeModalBtn').addEventListener('click', closeRequestModal);
-  $('#successCloseBtn').addEventListener('click', closeRequestModal);
+  $('#closeModalBtn').addEventListener('click', function() {
+    // If success is shown, reload when closing with X? We'll only reload on successCloseBtn.
+    const successVisible = $('#requestSuccess').classList.contains('show');
+    closeRequestModal(false);
+  });
+
+  // success close button: reload the page
+  $('#successCloseBtn').addEventListener('click', function() {
+    closeRequestModal(true); // reload
+  });
 
   function openRequestModal(id, presetType) {
     if (isSubmitting) return;
@@ -935,7 +1007,7 @@
     }
   });
 
-  // Init
+  // ─── Init ──────────────────────────────────────────────────
   Promise.all([loadSiteSettings(), loadFleet()]).then(() => {
     hideLoader();
     renderFleet();
@@ -944,7 +1016,8 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (downloadModal.classList.contains('show')) closeDownloadModalFn();
-      if ($('#requestModal').classList.contains('show')) closeRequestModal();
+      if (locationModal.classList.contains('show')) closeLocationModalFn();
+      if ($('#requestModal').classList.contains('show')) closeRequestModal(false);
       if ($('#detailOverlay').classList.contains('show')) closeDetail();
       if (loader.classList.contains('show')) hideLoader();
     }
