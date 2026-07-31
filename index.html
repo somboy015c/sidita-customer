@@ -287,9 +287,10 @@
     .topbar{ display:none; }
     .search-bar{ display:none; }
     .mobile-search-toggle, .mobile-menu-toggle{ display:flex; align-items:center; justify-content:center; }
-    .header-actions .header-link:not(.always-mobile){ display:none; }
+    /* Hide the header "Locate Office" link - only show in hamburger */
+    .header-actions .header-link#locateOfficeLink{ display:none !important; }
     .header-main{ padding:12px 0; gap:10px; }
-    .header-main .logo-bare{ order:1; }
+    .header-main .logo-bare{ order:1; margin:6px 0; } /* Add margin top/bottom to logo */
     .header-main .search-bar{ order:2; }
     .header-main .header-actions{ order:3; margin-left:auto; }
     .header-main .mobile-menu-toggle{ order:4; }
@@ -318,6 +319,8 @@
   }
   @media (min-width:761px){
     .mobile-panel a.download-link{ display:none !important; }
+    /* Hide mobile locate link in desktop, but show in hamburger on mobile */
+    .mobile-panel a#locateOfficeLinkMobile{ display:flex !important; }
   }
   @media (max-width:480px){
     #globalLoader .big-spinner{ width:34px; height:34px; }
@@ -355,8 +358,7 @@
         <div class="header-actions">
             <a href="#fleet" class="header-link"><i class="fas fa-car"></i>Fleet</a>
             <a href="#how" class="header-link"><i class="fas fa-circle-question"></i>How it works</a>
-            <!-- Locate Office link (visible on all devices) -->
-            <a href="#" class="header-link always-mobile" id="locateOfficeLink"><i class="fas fa-map-marker-alt"></i>Locate Office</a>
+            <!-- Locate Office link removed from header actions (only in hamburger) -->
             <button class="mobile-search-toggle" id="mobileSearchToggle"><i class="fas fa-search"></i></button>
         </div>
         <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
@@ -666,18 +668,14 @@
   const locationModal = $('#locationModal');
   const closeLocationBtn = $('#closeLocationModal');
   const mapContainer = $('#mapContainer');
-  const mapPlaceholder = $('#mapPlaceholder');
   const locAddress = $('#locAddress');
 
   function renderMap(officeKey) {
     const office = OFFICES[officeKey];
     if (!office) return;
 
-    // Update address
     locAddress.innerHTML = `<i class="fas fa-location-dot"></i> ${office.fullAddress}`;
 
-    // Build the iframe
-    // Use a proper embed URL with the address for better accuracy
     let embedUrl;
     if (officeKey === 'atlanta') {
       embedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3319.123456789!2d-84.410002!3d33.755001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88f5045d6995e3b1%3A0x7b8e3e4e5f6a7b8c!2s375%20James%20P%20Brawley%20NW%2C%20Atlanta%2C%20GA%2030314!5e0!3m2!1sen!2sus!4v1700000000000';
@@ -685,7 +683,6 @@
       embedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d252353.123456789!2d7.398!3d9.057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x104e0baf7d3e4e3b%3A0x7b8e3e4e5f6a7b8c!2sAbuja%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1700000000000';
     }
 
-    // Replace placeholder with iframe
     mapContainer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
   }
 
@@ -693,9 +690,7 @@
     e.preventDefault();
     locationModal.classList.add('show');
     document.body.style.overflow = 'hidden';
-    // Render default office (Atlanta)
     renderMap('atlanta');
-    // Update tab states
     $$('.office-tab').forEach(tab => {
       tab.classList.toggle('active', tab.dataset.office === 'atlanta');
     });
@@ -705,7 +700,6 @@
   function closeLocationModalFn() {
     locationModal.classList.remove('show');
     document.body.style.overflow = '';
-    // Reset map to placeholder
     mapContainer.innerHTML = `
       <div class="map-placeholder" id="mapPlaceholder">
         <i class="fas fa-map"></i>
@@ -714,12 +708,10 @@
     `;
   }
 
-  // Office tab click handlers
   $$('.office-tab').forEach(tab => {
     tab.addEventListener('click', function() {
       const office = this.dataset.office;
       if (office === 'abuja') {
-        // Show a small notification that it's coming soon
         alert('Abuja office is coming soon! Stay tuned.');
         return;
       }
@@ -730,7 +722,6 @@
     });
   });
 
-  // Close handlers
   closeLocationBtn.addEventListener('click', closeLocationModalFn);
   locationModal.addEventListener('click', (e) => {
     if (e.target === locationModal) closeLocationModalFn();
@@ -907,12 +898,9 @@
     }
   });
 
-  // ─── Locate Office links ──────────────────────────────────
-  const locateLinks = ['#locateOfficeLink', '#locateOfficeLinkMobile'];
-  locateLinks.forEach(id => {
-    const el = document.querySelector(id);
-    if (el) el.addEventListener('click', openLocationModal);
-  });
+  // ─── Locate Office links (only in mobile panel) ──────────────
+  const locateLinkMobile = document.querySelector('#locateOfficeLinkMobile');
+  if (locateLinkMobile) locateLinkMobile.addEventListener('click', openLocationModal);
 
   // ─── Download App Modal ────────────────────────────────────
   const downloadModal = $('#downloadModal');
@@ -1038,7 +1026,15 @@
     $('#requestModal').classList.remove('show');
     resetModalState();
     selectedVehicle = null;
+
     if (shouldReload) {
+      // Close all other modals before reload
+      if ($('#detailOverlay').classList.contains('show')) closeDetail();
+      if (downloadModal.classList.contains('show')) closeDownloadModalFn();
+      if (locationModal.classList.contains('show')) closeLocationModalFn();
+      // Remove hash to prevent detail from reopening on reload
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      // Reload the page
       location.reload();
     }
   }
