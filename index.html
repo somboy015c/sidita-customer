@@ -524,6 +524,13 @@
                 <div class="field"><label>Start date</label><input type="date" id="cStart"></div>
                 <div class="field"><label>End date</label><input type="date" id="cEnd"></div>
             </div>
+            <div id="priceEstimateBox" style="display:none; background:var(--emerald-tint); border:1px solid var(--emerald); border-radius:10px; padding:12px 14px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <span style="font-size:12px; font-weight:700; color:var(--emerald-deep); text-transform:uppercase; letter-spacing:.02em;">Estimated total</span>
+                    <span id="priceEstimateAmount" style="font-size:19px; font-weight:800; color:var(--emerald-deep);">—</span>
+                </div>
+                <div id="priceEstimateBreakdown" style="font-size:11.5px; color:var(--ink-soft); margin-top:2px;"></div>
+            </div>
             <div class="field"><label>Anything else?</label><textarea id="cNotes" rows="2" placeholder="Pickup city, questions…"></textarea></div>
             <button type="submit" class="btn btn-primary btn-block" id="submitRequestBtn">Send request</button>
         </form>
@@ -1018,6 +1025,48 @@
   const submitBtn = $('#submitRequestBtn');
   const originalBtnText = submitBtn.innerHTML;
 
+  let estimateRequestToken = 0;
+  async function refreshPriceEstimate() {
+    if (!selectedVehicle) return;
+    const box = $('#priceEstimateBox');
+    const amountEl = $('#priceEstimateAmount');
+    const breakdownEl = $('#priceEstimateBreakdown');
+
+    if (selectedType !== 'purchase' && (!$('#cStart').value || !$('#cEnd').value)) {
+      box.style.display = 'none';
+      return;
+    }
+
+    const myToken = ++estimateRequestToken;
+    box.style.display = 'block';
+    amountEl.textContent = '…';
+    breakdownEl.textContent = 'Calculating…';
+
+    try {
+      const res = await fetch(API_BASE + '/leases/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicle: selectedVehicle._id,
+          type: selectedType,
+          startDate: $('#cStart').value || undefined,
+          endDate: $('#cEnd').value || undefined
+        })
+      });
+      const data = await res.json();
+      if (myToken !== estimateRequestToken) return; // a newer request has since started — ignore this stale one
+      if (!res.ok) throw new Error(data.error || 'Could not calculate estimate');
+      amountEl.textContent = fmtMoney(data.total);
+      breakdownEl.textContent = data.breakdown || '';
+    } catch (err) {
+      if (myToken !== estimateRequestToken) return;
+      amountEl.textContent = '—';
+      breakdownEl.textContent = "Couldn't calculate an estimate right now.";
+    }
+  }
+  $('#cStart').addEventListener('change', refreshPriceEstimate);
+  $('#cEnd').addEventListener('change', refreshPriceEstimate);
+
   function resetModalState() {
     $('#requestSuccess').classList.remove('show');
     $('#requestForm').style.display = 'block';
@@ -1026,6 +1075,7 @@
     submitBtn.innerHTML = originalBtnText;
     isSubmitting = false;
     $('#dateFields').style.display = 'grid';
+    $('#priceEstimateBox').style.display = 'none';
     $$('.type-btn').forEach(b => b.classList.remove('active'));
     const defaultBtn = document.querySelector('.type-btn[data-type="rental"]');
     if (defaultBtn) defaultBtn.classList.add('active');
@@ -1078,6 +1128,7 @@
     $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === selectedType));
     $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
     $('#requestModal').classList.add('show');
+    refreshPriceEstimate();
   }
 
   $$('.type-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -1086,6 +1137,7 @@
     btn.classList.add('active');
     selectedType = btn.dataset.type;
     $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
+    refreshPriceEstimate();
   }));
 
   $('#requestForm').addEventListener('submit', async (e) => {
