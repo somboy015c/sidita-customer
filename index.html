@@ -635,6 +635,7 @@
   let allVehicles = [];
   let currentStatus = '';
   let currentCategory = '';
+  let currentFuel = '';
   let currentSort = '';
   let selectedVehicle = null;
   let selectedType = 'rental';
@@ -805,6 +806,7 @@
         if (v.listingStatus !== 'For Sale') return false;
       } else if (currentStatus && v.status !== currentStatus) return false;
       if (currentCategory && v.category !== currentCategory) return false;
+      if (currentFuel && v.fuelType !== currentFuel) return false;
       if (search && !(v.name.toLowerCase().includes(search) || v.brand.toLowerCase().includes(search))) return false;
       return true;
     });
@@ -1131,8 +1133,29 @@
   });
 
   // ─── Init ──────────────────────────────────────────────────
+  function applyFiltersFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get('category');
+    const fuel = params.get('fuel');
+    const status = params.get('status');
+
+    if (cat) {
+      currentCategory = cat;
+      $$('#categoryChips .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+    }
+    if (fuel) currentFuel = fuel;
+    if (status) {
+      currentStatus = status;
+      $$('#statusTabs .status-chip').forEach(c => c.classList.toggle('active', c.dataset.status === status));
+    }
+    if (cat || fuel || status) {
+      document.getElementById('fleet').scrollIntoView({ behavior: 'auto' });
+    }
+  }
+
   Promise.all([loadSiteSettings(), loadFleet()]).then(() => {
     hideLoader();
+    applyFiltersFromUrl();
     renderFleet();
   });
 
