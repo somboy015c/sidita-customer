@@ -934,10 +934,10 @@
     if (e.target === downloadModal) closeDownloadModalFn();
   });
 
-  $('#dlAndroid').addEventListener('click', () => {
-    alert('Android app download will be available soon!');
-    closeDownloadModalFn();
-  });
+ $('#dlAndroid').addEventListener('click', () => {
+   window.location.href = 'https://github.com/somboy015c/sidita-app/releases/download/latest-android/sidita-fleet.apk';
+   closeDownloadModalFn();
+ });
   $('#dlIos').addEventListener('click', () => {
     alert('iOS app download will be available soon!');
     closeDownloadModalFn();
