@@ -1025,46 +1025,70 @@
   const submitBtn = $('#submitRequestBtn');
   const originalBtnText = submitBtn.innerHTML;
 
-  let estimateRequestToken = 0;
-  async function refreshPriceEstimate() {
+  // Date bounds: no past dates, nothing more than a year out.
+  const todayStr = new Date().toISOString().split('T')[0];
+  const maxDateObj = new Date();
+  maxDateObj.setFullYear(maxDateObj.getFullYear() + 1);
+  const maxDateStr = maxDateObj.toISOString().split('T')[0];
+  $('#cStart').min = todayStr;
+  $('#cStart').max = maxDateStr;
+  $('#cEnd').min = todayStr;
+  $('#cEnd').max = maxDateStr;
+
+  // Breaks the span between two dates into whole calendar months + leftover days.
+  function diffMonthsAndDays(start, end) {
+    let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    let days = end.getDate() - start.getDate();
+    if (days < 0) {
+      months -= 1;
+      const prevMonthLastDay = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+      days += prevMonthLastDay;
+    }
+    if (months < 0) { months = 0; days = 0; }
+    return { months, days };
+  }
+
+  function refreshPriceEstimate() {
     if (!selectedVehicle) return;
     const box = $('#priceEstimateBox');
     const amountEl = $('#priceEstimateAmount');
     const breakdownEl = $('#priceEstimateBreakdown');
 
-    if (selectedType !== 'purchase' && (!$('#cStart').value || !$('#cEnd').value)) {
+    const startVal = $('#cStart').value;
+    const endVal = $('#cEnd').value;
+
+    if (selectedType !== 'purchase' && (!startVal || !endVal)) {
       box.style.display = 'none';
       return;
     }
 
-    const myToken = ++estimateRequestToken;
     box.style.display = 'block';
-    amountEl.textContent = '…';
-    breakdownEl.textContent = 'Calculating…';
 
-    try {
-      const res = await fetch(API_BASE + '/leases/estimate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehicle: selectedVehicle._id,
-          type: selectedType,
-          startDate: $('#cStart').value || undefined,
-          endDate: $('#cEnd').value || undefined
-        })
-      });
-      const data = await res.json();
-      if (myToken !== estimateRequestToken) return; // a newer request has since started — ignore this stale one
-      if (!res.ok) throw new Error(data.error || 'Could not calculate estimate');
-      amountEl.textContent = fmtMoney(data.total);
-      breakdownEl.textContent = data.breakdown || '';
-    } catch (err) {
-      if (myToken !== estimateRequestToken) return;
+    const start = new Date(startVal + 'T00:00:00');
+    const end = new Date(endVal + 'T00:00:00');
+
+    if (end < start) {
       amountEl.textContent = '—';
-      breakdownEl.textContent = "Couldn't calculate an estimate right now.";
+      breakdownEl.textContent = 'End date must be after the start date.';
+      return;
     }
+
+    const { months, days } = diffMonthsAndDays(start, end);
+    const monthlyRate = Number(selectedVehicle.monthlyLeaseRate || 0);
+    const dailyRate = Number(selectedVehicle.dailyRentalRate || 0);
+    const total = (months * monthlyRate) + (days * dailyRate);
+
+    amountEl.textContent = fmtMoney(total);
+    const parts = [];
+    if (months > 0) parts.push(`${months} month${months === 1 ? '' : 's'} × ${fmtMoney(monthlyRate)}`);
+    if (days > 0 || months === 0) parts.push(`${days} day${days === 1 ? '' : 's'} × ${fmtMoney(dailyRate)}`);
+    breakdownEl.textContent = parts.join(' + ');
   }
-  $('#cStart').addEventListener('change', refreshPriceEstimate);
+  $('#cStart').addEventListener('change', () => {
+    // Prevent picking an end date before the (possibly updated) start date.
+    $('#cEnd').min = $('#cStart').value || todayStr;
+    refreshPriceEstimate();
+  });
   $('#cEnd').addEventListener('change', refreshPriceEstimate);
 
   function resetModalState() {
@@ -1076,6 +1100,7 @@
     isSubmitting = false;
     $('#dateFields').style.display = 'grid';
     $('#priceEstimateBox').style.display = 'none';
+    $('#cEnd').min = todayStr;
     $$('.type-btn').forEach(b => b.classList.remove('active'));
     const defaultBtn = document.querySelector('.type-btn[data-type="rental"]');
     if (defaultBtn) defaultBtn.classList.add('active');
