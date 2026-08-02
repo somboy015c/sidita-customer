@@ -1141,8 +1141,7 @@
     resetModalState();
 
     $('#modalVehicleName').textContent = selectedVehicle.name;
-    $('#modalVehicleMeta').textContent =
-      `${selectedVehicle.brand} · ${selectedVehicle.modelYear} · ${fmtMoney(selectedVehicle.dailyRentalRate)}/day · ${fmtMoney(selectedVehicle.monthlyLeaseRate)}/month`;
+    $('#modalVehicleMeta').textContent = `${selectedVehicle.brand} · ${selectedVehicle.modelYear}`;
 
     const canBuy = selectedVehicle.listingStatus === 'For Sale';
     $$('.type-btn').forEach(b => {
