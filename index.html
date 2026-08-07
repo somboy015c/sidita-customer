@@ -69,6 +69,7 @@
   .search-bar button{ position:absolute; right:4px; top:4px; bottom:4px; width:40px; border-radius:7px; background:var(--grad-emerald); color:#fff; border:none; display:flex; align-items:center; justify-content:center; }
   .header-actions{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
   .header-link{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 12px; font-size:11px; font-weight:600; color:var(--ink-soft); border-radius:9px; }
+  button.header-link{ background:none; border:none; cursor:pointer; font-family:inherit; }
   .header-link:hover{ background:var(--ash); color:var(--emerald); }
   .header-link i{ font-size:16px; }
   .mobile-search-toggle, .mobile-menu-toggle{ display:none; background:none; border:none; font-size:19px; color:var(--ink); padding:8px; }
@@ -203,8 +204,6 @@
   .form-success.show ~ form{ display:none; }
   .form-success .check{ width:48px; height:48px; border-radius:50%; background:var(--grad-emerald); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
   .form-success .check svg{ width:24px; height:24px; stroke:#fff; stroke-width:2.5; }
-  .form-success .check.gold{ background:var(--grad-gold); }
-  .form-success .check.gold i{ color:#2b2308; font-size:19px; }
 
   /* ---------- Download App Modal ---------- */
   #downloadModal{ display:none; position:fixed; inset:0; background:rgba(20,32,29,0.60); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:400; align-items:center; justify-content:center; padding:24px 16px; }
@@ -362,6 +361,7 @@
             <a href="#how" class="header-link"><i class="fas fa-circle-question"></i>How it works</a>
             <!-- Locate Office link - hidden on mobile via CSS -->
             <a href="#" class="header-link" id="locateOfficeLink"><i class="fas fa-map-marker-alt"></i>Locate Office</a>
+            <button type="button" class="header-link" id="accountBtn"><i class="fas fa-user"></i><span id="accountBtnLabel">Sign In</span></button>
             <button class="mobile-search-toggle" id="mobileSearchToggle"><i class="fas fa-search"></i></button>
         </div>
         <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
@@ -380,6 +380,7 @@
         <a href="#how"><i class="fas fa-circle-question"></i> How it works</a>
         <a href="#" id="locateOfficeLinkMobile"><i class="fas fa-map-marker-alt"></i> Locate Office</a>
         <a href="#" class="download-link" id="downloadAppLink"><i class="fas fa-mobile-alt"></i> Download App</a>
+        <a href="#" id="accountLinkMobile"><i class="fas fa-user"></i> <span id="accountLinkMobileLabel">Sign In</span></a>
         <div class="divider"></div>
         <a href="https://somboy015c.github.io/sidita"><i class="fas fa-globe"></i> Main site</a>
     </div>
@@ -517,11 +518,12 @@
                 <button type="button" class="type-btn" data-type="lease">Lease</button>
                 <button type="button" class="type-btn" data-type="purchase">Buy</button>
             </div>
-            <div class="form-row">
+            <p id="signedInAsNote" style="display:none; font-size:12px; color:var(--ink-soft); background:var(--emerald-tint); border-radius:8px; padding:8px 12px; margin-bottom:14px;"></p>
+            <div class="form-row" id="guestNameRow">
                 <div class="field"><label>Full name</label><input type="text" id="cName" required></div>
                 <div class="field"><label>Phone</label><input type="tel" id="cPhone" required></div>
             </div>
-            <div class="field"><label>Email</label><input type="email" id="cEmail" required></div>
+            <div class="field" id="guestEmailField"><label>Email</label><input type="email" id="cEmail" required></div>
             <div class="form-row" id="dateFields">
                 <div class="field"><label>Start date</label><input type="date" id="cStart"></div>
                 <div class="field"><label>End date</label><input type="date" id="cEnd"></div>
@@ -543,13 +545,60 @@
             <p style="color:var(--ink-soft);margin-top:6px; font-size:13px;">An advisor will reach out to confirm details shortly.</p>
             <button class="btn btn-outline btn-sm" id="successCloseBtn" style="margin-top:16px;">Close</button>
         </div>
+    </div>
+</div>
 
-        <div class="form-success" id="requestUnavailable">
-            <div class="check gold"><i class="fas fa-clock"></i></div>
-            <h3 id="unavailableTitle">Currently unavailable</h3>
-            <p id="unavailableMessage" style="color:var(--ink-soft);margin-top:6px; font-size:13px; line-height:1.5;"></p>
-            <button class="btn btn-outline btn-sm" id="unavailableCloseBtn" style="margin-top:16px;">Close</button>
+<!-- ─── AUTH MODAL (Sign In / Create Account) ─── -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal">
+        <button class="modal-close" id="closeAuthModalBtn">&times;</button>
+        <h3 id="authModalTitle">Sign In</h3>
+        <p class="sub" id="authModalSub">Welcome back — sign in to continue.</p>
+
+        <div class="type-toggle" id="authTabToggle">
+            <button type="button" class="type-btn active" data-authtab="login">Sign In</button>
+            <button type="button" class="type-btn" data-authtab="signup">Create Account</button>
         </div>
+
+        <form id="loginForm">
+            <div class="field"><label>Email</label><input type="email" id="loginEmail" required></div>
+            <div class="field"><label>Password</label><input type="password" id="loginPassword" required></div>
+            <p id="loginError" style="display:none; color:#B3392C; font-size:12.5px; margin-bottom:10px;"></p>
+            <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Sign In</button>
+        </form>
+
+        <form id="signupForm" style="display:none;">
+            <div class="field"><label>Full name</label><input type="text" id="signupName" required></div>
+            <div class="form-row">
+                <div class="field"><label>Email</label><input type="email" id="signupEmail" required></div>
+                <div class="field"><label>Phone</label><input type="tel" id="signupPhone"></div>
+            </div>
+            <div class="field"><label>Password</label><input type="password" id="signupPassword" minlength="8" required></div>
+            <p style="color:var(--ink-faint); font-size:11px; margin:-6px 0 12px;">At least 8 characters.</p>
+            <p id="signupError" style="display:none; color:#B3392C; font-size:12.5px; margin-bottom:10px;"></p>
+            <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create Account</button>
+        </form>
+    </div>
+</div>
+
+<!-- ─── ACCOUNT MODAL ─── -->
+<div class="modal-overlay" id="accountModal">
+    <div class="modal" style="max-width:420px;">
+        <button class="modal-close" id="closeAccountModalBtn">&times;</button>
+        <h3>My Account</h3>
+        <p class="sub" id="accountModalInfo"></p>
+        <button type="button" class="btn btn-outline btn-block" id="viewMyRequestsBtn" style="margin-bottom:10px;">View My Requests</button>
+        <button type="button" class="btn btn-block" id="logoutBtn" style="background:#B3392C; color:#fff;">Log Out</button>
+    </div>
+</div>
+
+<!-- ─── MY REQUESTS MODAL ─── -->
+<div class="modal-overlay" id="myRequestsModal">
+    <div class="modal" style="max-width:600px;">
+        <button class="modal-close" id="closeMyRequestsModalBtn">&times;</button>
+        <h3>My Requests</h3>
+        <p class="sub">Everything you've requested from SIDITA.</p>
+        <div id="myRequestsList" style="max-height:420px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
     </div>
 </div>
 
@@ -648,6 +697,7 @@
   };
 
   let siteCurrency = { code: 'NGN', symbol: '₦' };
+  let guestModeEnabled = true;
   let allVehicles = [];
   let currentStatus = '';
   let currentCategory = '';
@@ -757,6 +807,7 @@
       if (!res.ok) return;
       const data = await res.json();
       if (data.currency) siteCurrency = data.currency;
+      guestModeEnabled = data.guestModeEnabled !== false;
       const categories = data.vehicleCategories || [];
       const container = $('#categoryChips');
       container.innerHTML = '<button type="button" class="cat-chip active" data-cat="">All categories</button>' +
@@ -781,6 +832,175 @@
       }));
     } catch (_) { /* non-critical */ }
   }
+
+  // ─── Customer Accounts ──────────────────────────────────────
+  let currentCustomer = null;
+  let pendingRequest = null; // { id, presetType } — resumed automatically after sign-in
+
+  function getCustomerToken() { return localStorage.getItem('sidita_customer_token'); }
+  function setCustomerToken(t) { localStorage.setItem('sidita_customer_token', t); }
+  function clearCustomerToken() { localStorage.removeItem('sidita_customer_token'); }
+
+  async function loadCustomerProfile() {
+    const token = getCustomerToken();
+    if (!token) { updateAccountUI(); return; }
+    try {
+      const res = await fetch(API_BASE + '/customer-auth/me', { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) throw new Error();
+      currentCustomer = await res.json();
+    } catch (_) {
+      clearCustomerToken();
+      currentCustomer = null;
+    }
+    updateAccountUI();
+  }
+
+  function updateAccountUI() {
+    const label = currentCustomer ? currentCustomer.name.split(' ')[0] : 'Sign In';
+    const btnLabel = $('#accountBtnLabel');
+    const mobileLabel = $('#accountLinkMobileLabel');
+    if (btnLabel) btnLabel.textContent = label;
+    if (mobileLabel) mobileLabel.textContent = label;
+  }
+
+  function openAccountAction() {
+    if (currentCustomer) {
+      $('#accountModalInfo').textContent = `Signed in as ${currentCustomer.name} (${currentCustomer.email})`;
+      $('#accountModal').classList.add('show');
+    } else {
+      openAuthModal('login');
+    }
+  }
+  $('#accountBtn').addEventListener('click', openAccountAction);
+  $('#accountLinkMobile').addEventListener('click', (e) => {
+    e.preventDefault();
+    $('#mobilePanel').classList.remove('show');
+    openAccountAction();
+  });
+
+  function openAuthModal(tab) {
+    setAuthTab(tab || 'login');
+    $('#loginError').style.display = 'none';
+    $('#signupError').style.display = 'none';
+    $('#authModal').classList.add('show');
+  }
+  function closeAuthModal() { $('#authModal').classList.remove('show'); }
+  $('#closeAuthModalBtn').addEventListener('click', closeAuthModal);
+
+  function setAuthTab(tab) {
+    $$('#authTabToggle .type-btn').forEach(b => b.classList.toggle('active', b.dataset.authtab === tab));
+    $('#loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    $('#signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+    $('#authModalTitle').textContent = tab === 'login' ? 'Sign In' : 'Create Account';
+    $('#authModalSub').textContent = tab === 'login' ? 'Welcome back — sign in to continue.' : 'Takes less than a minute.';
+  }
+  $$('#authTabToggle .type-btn').forEach(btn => btn.addEventListener('click', () => setAuthTab(btn.dataset.authtab)));
+
+  async function afterSuccessfulAuth(data) {
+    setCustomerToken(data.token);
+    currentCustomer = data.customer;
+    updateAccountUI();
+    closeAuthModal();
+    if (pendingRequest) {
+      const { id, presetType } = pendingRequest;
+      pendingRequest = null;
+      openRequestModal(id, presetType);
+    }
+  }
+
+  $('#loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#loginSubmitBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Signing in…';
+    btn.disabled = true;
+    $('#loginError').style.display = 'none';
+    try {
+      const res = await fetch(API_BASE + '/customer-auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('#loginEmail').value, password: $('#loginPassword').value })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sign in failed');
+      $('#loginForm').reset();
+      await afterSuccessfulAuth(data);
+    } catch (err) {
+      $('#loginError').textContent = err.message;
+      $('#loginError').style.display = 'block';
+    } finally {
+      btn.textContent = original;
+      btn.disabled = false;
+    }
+  });
+
+  $('#signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#signupSubmitBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Creating account…';
+    btn.disabled = true;
+    $('#signupError').style.display = 'none';
+    try {
+      const res = await fetch(API_BASE + '/customer-auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: $('#signupName').value,
+          email: $('#signupEmail').value,
+          phone: $('#signupPhone').value,
+          password: $('#signupPassword').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not create account');
+      $('#signupForm').reset();
+      await afterSuccessfulAuth(data);
+    } catch (err) {
+      $('#signupError').textContent = err.message;
+      $('#signupError').style.display = 'block';
+    } finally {
+      btn.textContent = original;
+      btn.disabled = false;
+    }
+  });
+
+  $('#closeAccountModalBtn').addEventListener('click', () => $('#accountModal').classList.remove('show'));
+  $('#logoutBtn').addEventListener('click', () => {
+    clearCustomerToken();
+    currentCustomer = null;
+    updateAccountUI();
+    $('#accountModal').classList.remove('show');
+  });
+
+  $('#viewMyRequestsBtn').addEventListener('click', async () => {
+    $('#accountModal').classList.remove('show');
+    $('#myRequestsModal').classList.add('show');
+    const list = $('#myRequestsList');
+    list.innerHTML = '<p style="color:var(--ink-soft); font-size:13px; text-align:center; padding:20px 0;">Loading…</p>';
+    try {
+      const res = await fetch(API_BASE + '/leases/mine', { headers: { Authorization: 'Bearer ' + getCustomerToken() } });
+      if (!res.ok) throw new Error('Could not load your requests');
+      const requests = await res.json();
+      if (!requests.length) {
+        list.innerHTML = '<p style="color:var(--ink-soft); font-size:13px; text-align:center; padding:20px 0;">You haven\'t made any requests yet.</p>';
+        return;
+      }
+      list.innerHTML = requests.map(r => `
+        <div style="border:1px solid var(--border); border-radius:10px; padding:12px 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">
+            <strong style="font-size:13.5px;">${r.vehicle ? r.vehicle.name : 'Vehicle removed'}</strong>
+            <span class="pill sd-${r.status === 'cancelled' ? 'maintenance' : (r.status === 'pending' ? 'leased' : 'available')}" style="text-transform:capitalize;">${r.status}</span>
+          </div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px; text-transform:capitalize;">${r.type} &middot; ${new Date(r.createdAt).toLocaleDateString()}</div>
+          ${r.totalValue ? `<div style="font-size:13px; font-weight:700; color:var(--emerald-deep); margin-top:4px;">${fmtMoney(r.totalValue)}</div>` : ''}
+        </div>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = `<p style="color:#B3392C; font-size:13px; text-align:center; padding:20px 0;">${err.message}</p>`;
+    }
+  });
+  $('#closeMyRequestsModalBtn').addEventListener('click', () => $('#myRequestsModal').classList.remove('show'));
 
   async function loadFleet() {
     showLoader('<span>Loading</span> fleet …');
@@ -1102,7 +1322,6 @@
 
   function resetModalState() {
     $('#requestSuccess').classList.remove('show');
-    $('#requestUnavailable').classList.remove('show');
     $('#requestForm').style.display = 'block';
     $('#requestForm').reset();
     submitBtn.disabled = false;
@@ -1111,7 +1330,7 @@
     $('#dateFields').style.display = 'grid';
     $('#priceEstimateBox').style.display = 'none';
     $('#cEnd').min = todayStr;
-    $$('.type-btn').forEach(b => b.classList.remove('active'));
+    $$('#typeToggle .type-btn').forEach(b => b.classList.remove('active'));
     const defaultBtn = document.querySelector('.type-btn[data-type="rental"]');
     if (defaultBtn) defaultBtn.classList.add('active');
     selectedType = 'rental';
@@ -1143,67 +1362,54 @@
     closeRequestModal(true);
   });
 
-  $('#unavailableCloseBtn').addEventListener('click', function() {
-    closeRequestModal(false);
-  });
-
-  // Vehicles currently on an active lease or rental shouldn't accept new
-  // requests. If the API includes a field for when the current booking
-  // ends, we show that date; otherwise we still block the request with a
-  // generic "check back later" message. Add any other field name your
-  // backend actually uses to this list.
-  function getUnavailableUntil(v) {
-    const candidates = [
-      v.currentLeaseEnd, v.currentRentEnd, v.leaseEndDate, v.rentEndDate,
-      v.currentBookingEnd, v.unavailableUntil, v.availableFrom,
-      v.returnDate, v.leaseEnd, v.rentEnd
-    ];
-    const found = candidates.find(d => d);
-    return found ? new Date(found) : null;
-  }
-
-  function fmtLongDate(d) {
-    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  }
-
   function openRequestModal(id, presetType) {
     if (isSubmitting) return;
     selectedVehicle = allVehicles.find(v => v._id === id);
     if (!selectedVehicle) return;
+
+    if (!guestModeEnabled && !currentCustomer) {
+      pendingRequest = { id, presetType };
+      openAuthModal('login');
+      return;
+    }
 
     resetModalState();
 
     $('#modalVehicleName').textContent = selectedVehicle.name;
     $('#modalVehicleMeta').textContent = `${selectedVehicle.brand} · ${selectedVehicle.modelYear}`;
 
-    if (selectedVehicle.status === 'leased' || selectedVehicle.status === 'rented') {
-      const verb = selectedVehicle.status === 'leased' ? 'lease' : 'rental';
-      const until = getUnavailableUntil(selectedVehicle);
-      $('#unavailableTitle').textContent = `Currently ${selectedVehicle.status}`;
-      $('#unavailableMessage').textContent = until
-        ? `This vehicle is on an active ${verb} through ${fmtLongDate(until)}. Please check back after that date, or browse our other available vehicles in the meantime.`
-        : `This vehicle is on an active ${verb} right now, so it isn't available to request. Please check back later, or browse our other available vehicles in the meantime.`;
-      $('#requestForm').style.display = 'none';
-      $('#requestUnavailable').classList.add('show');
-      $('#requestModal').classList.add('show');
-      return;
+    if (currentCustomer) {
+      $('#guestNameRow').style.display = 'none';
+      $('#guestEmailField').style.display = 'none';
+      $('#cName').required = false;
+      $('#cPhone').required = false;
+      $('#cEmail').required = false;
+      $('#signedInAsNote').textContent = `Requesting as ${currentCustomer.name} (${currentCustomer.email})`;
+      $('#signedInAsNote').style.display = 'block';
+    } else {
+      $('#guestNameRow').style.display = 'grid';
+      $('#guestEmailField').style.display = 'block';
+      $('#cName').required = true;
+      $('#cPhone').required = true;
+      $('#cEmail').required = true;
+      $('#signedInAsNote').style.display = 'none';
     }
 
     const canBuy = selectedVehicle.listingStatus === 'For Sale';
-    $$('.type-btn').forEach(b => {
+    $$('#typeToggle .type-btn').forEach(b => {
       b.style.display = (b.dataset.type === 'purchase' && !canBuy) ? 'none' : 'flex';
     });
 
     selectedType = presetType || 'rental';
-    $$('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === selectedType));
+    $$('#typeToggle .type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === selectedType));
     $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
     $('#requestModal').classList.add('show');
     refreshPriceEstimate();
   }
 
-  $$('.type-btn').forEach(btn => btn.addEventListener('click', () => {
+  $$('#typeToggle .type-btn').forEach(btn => btn.addEventListener('click', () => {
     if (isSubmitting) return;
-    $$('.type-btn').forEach(b => b.classList.remove('active'));
+    $$('#typeToggle .type-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedType = btn.dataset.type;
     $('#dateFields').style.display = selectedType === 'purchase' ? 'none' : 'grid';
@@ -1223,18 +1429,23 @@
     const payload = {
       vehicle: selectedVehicle._id,
       type: selectedType,
-      customerName: $('#cName').value,
-      customerEmail: $('#cEmail').value,
-      customerPhone: $('#cPhone').value,
       startDate: $('#cStart').value || undefined,
       endDate: $('#cEnd').value || undefined,
       notes: $('#cNotes').value
     };
+    if (!currentCustomer) {
+      payload.customerName = $('#cName').value;
+      payload.customerEmail = $('#cEmail').value;
+      payload.customerPhone = $('#cPhone').value;
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (currentCustomer) headers.Authorization = 'Bearer ' + getCustomerToken();
 
     try {
       const res = await fetch(API_BASE + '/leases', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -1280,6 +1491,7 @@
     applyFiltersFromUrl();
     renderFleet();
   });
+  loadCustomerProfile();
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1287,6 +1499,9 @@
       if (locationModal.classList.contains('show')) closeLocationModalFn();
       if ($('#requestModal').classList.contains('show')) closeRequestModal(false);
       if ($('#detailOverlay').classList.contains('show')) closeDetail();
+      if ($('#authModal').classList.contains('show')) closeAuthModal();
+      if ($('#accountModal').classList.contains('show')) $('#accountModal').classList.remove('show');
+      if ($('#myRequestsModal').classList.contains('show')) $('#myRequestsModal').classList.remove('show');
       if (loader.classList.contains('show')) hideLoader();
     }
   });
