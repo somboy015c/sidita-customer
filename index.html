@@ -172,6 +172,10 @@
   .detail-info{ padding:26px 26px 26px 6px; display:flex; flex-direction:column; }
   .detail-badges{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
   .pill{ font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:7px; text-transform:capitalize; }
+  .msg-bubble{ max-width:80%; padding:10px 14px; border-radius:14px; font-size:13px; line-height:1.4; }
+  .msg-bubble .msg-meta{ font-size:10px; opacity:0.7; margin-top:4px; }
+  .msg-bubble.msg-customer{ align-self:flex-end; background:var(--grad-emerald); color:#fff; border-bottom-right-radius:4px; }
+  .msg-bubble.msg-admin{ align-self:flex-start; background:var(--ash); color:var(--ink); border-bottom-left-radius:4px; }
   .detail-info h2{ font-size:20px; margin-bottom:3px; }
   .detail-info .meta{ color:var(--ink-soft); font-size:12.5px; margin-bottom:14px; }
   .detail-specs{ display:grid; grid-template-columns:1fr 1fr; gap:9px 16px; margin-bottom:16px; }
@@ -588,6 +592,7 @@
         <h3>My Account</h3>
         <p class="sub" id="accountModalInfo"></p>
         <button type="button" class="btn btn-outline btn-block" id="viewMyRequestsBtn" style="margin-bottom:10px;">View My Requests</button>
+        <button type="button" class="btn btn-outline btn-block" id="viewMyMessagesBtn" style="margin-bottom:10px;">Messages</button>
         <button type="button" class="btn btn-block" id="logoutBtn" style="background:#B3392C; color:#fff;">Log Out</button>
     </div>
 </div>
@@ -599,6 +604,20 @@
         <h3>My Requests</h3>
         <p class="sub">Everything you've requested from SIDITA.</p>
         <div id="myRequestsList" style="max-height:420px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+</div>
+
+<!-- ─── MESSAGES MODAL ─── -->
+<div class="modal-overlay" id="myMessagesModal">
+    <div class="modal" style="max-width:560px;">
+        <button class="modal-close" id="closeMyMessagesModalBtn">&times;</button>
+        <h3>Messages</h3>
+        <p class="sub">Chat directly with the SIDITA team about your requests.</p>
+        <div id="myMessagesThread" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:4px;"></div>
+        <form id="customerMessageForm" style="display:flex; gap:8px; margin-top:16px;">
+            <input type="text" id="customerMessageInput" placeholder="Type a message…" required style="flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; outline:none; font-size:14px;">
+            <button type="submit" class="btn btn-primary" id="customerMessageSendBtn" style="padding:10px 16px;"><i class="fas fa-paper-plane"></i></button>
+        </form>
     </div>
 </div>
 
@@ -1001,6 +1020,63 @@
     }
   });
   $('#closeMyRequestsModalBtn').addEventListener('click', () => $('#myRequestsModal').classList.remove('show'));
+
+  // ─── Messages ───────────────────────────────────────────────
+  function renderMyMessagesThread(messages) {
+    const thread = $('#myMessagesThread');
+    if (!messages.length) {
+      thread.innerHTML = '<p style="color:var(--ink-soft); font-size:13px; text-align:center; padding:20px 0;">No messages yet — say hello.</p>';
+      return;
+    }
+    thread.innerHTML = messages.map(m => `
+      <div class="msg-bubble msg-${m.sender}">
+        <div>${m.body.replace(/</g, '&lt;')}</div>
+        <div class="msg-meta">${m.sender === 'admin' ? m.senderName : 'You'} · ${new Date(m.createdAt).toLocaleString()}</div>
+      </div>
+    `).join('');
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  $('#viewMyMessagesBtn').addEventListener('click', async () => {
+    $('#accountModal').classList.remove('show');
+    $('#myMessagesModal').classList.add('show');
+    $('#myMessagesThread').innerHTML = '<p style="color:var(--ink-soft); font-size:13px; text-align:center; padding:20px 0;">Loading…</p>';
+    try {
+      const res = await fetch(API_BASE + '/messages/mine/thread', { headers: { Authorization: 'Bearer ' + getCustomerToken() } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load messages');
+      renderMyMessagesThread(data.messages);
+    } catch (err) {
+      $('#myMessagesThread').innerHTML = `<p style="color:#B3392C; font-size:13px; text-align:center; padding:20px 0;">${err.message}</p>`;
+    }
+  });
+  $('#closeMyMessagesModalBtn').addEventListener('click', () => $('#myMessagesModal').classList.remove('show'));
+
+  $('#customerMessageForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = $('#customerMessageInput');
+    const body = input.value.trim();
+    if (!body) return;
+    const sendBtn = $('#customerMessageSendBtn');
+    sendBtn.disabled = true;
+    try {
+      const res = await fetch(API_BASE + '/messages/mine/thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getCustomerToken() },
+        body: JSON.stringify({ body })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not send message');
+      input.value = '';
+      const threadRes = await fetch(API_BASE + '/messages/mine/thread', { headers: { Authorization: 'Bearer ' + getCustomerToken() } });
+      const threadData = await threadRes.json();
+      renderMyMessagesThread(threadData.messages);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      sendBtn.disabled = false;
+    }
+  });
 
   async function loadFleet() {
     showLoader('<span>Loading</span> fleet …');
@@ -1502,6 +1578,7 @@
       if ($('#authModal').classList.contains('show')) closeAuthModal();
       if ($('#accountModal').classList.contains('show')) $('#accountModal').classList.remove('show');
       if ($('#myRequestsModal').classList.contains('show')) $('#myRequestsModal').classList.remove('show');
+      if ($('#myMessagesModal').classList.contains('show')) $('#myMessagesModal').classList.remove('show');
       if (loader.classList.contains('show')) hideLoader();
     }
   });
